@@ -130,6 +130,25 @@ const SUMMARY_SYSTEM_DETAILED =
   "No inventes información que no esté en el hilo." +
   PLAIN_TEXT_RULE;
 
+const IMPROVE_SYSTEM =
+  "Eres un asistente de redacción de correos electrónicos. Recibirás el texto plano del " +
+  "borrador de un correo y una instrucción de mejora del usuario. Reescribe el borrador " +
+  "siguiendo la instrucción. Responde ÚNICAMENTE con el texto mejorado del correo: sin " +
+  "explicaciones, sin asunto y sin comentarios antes o después. Conserva el idioma del " +
+  "borrador salvo que la instrucción pida cambiarlo, y no inventes información que no esté " +
+  "en el borrador. Escribe en texto plano, sin formato Markdown (nada de asteriscos ni " +
+  "almohadillas).";
+
+// DEV-09: mejora del borrador según una instrucción libre del usuario.
+export function improveDraft(draftText, instruction) {
+  return callClaude({
+    model: MODELS.improveDraft,
+    system: IMPROVE_SYSTEM,
+    userText: `Instrucción de mejora: ${instruction}\n\nBorrador:\n${draftText}`,
+    maxTokens: 2048,
+  });
+}
+
 // DEV-05: resumen del hilo. `detailed` elige modelo y estilo.
 export function summarizeThread(threadText, { detailed = false } = {}) {
   return callClaude({

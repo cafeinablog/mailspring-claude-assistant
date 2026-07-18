@@ -50,6 +50,50 @@
         color: @text-color-very-subtle;
         font-style: italic;
       }
+
+      &.loading {
+        color: @text-color-very-subtle;
+        font-style: italic;
+      }
+
+      &.error {
+        color: @color-error;
+      }
+
+      // Vista compacta del texto actual del borrador (etapa de instrucción).
+      &.draft-preview {
+        max-height: 120px;
+        color: @text-color-very-subtle;
+        border: 1px solid @border-color-divider;
+        border-radius: 3px;
+        padding: @padding-small-vertical @padding-small-horizontal;
+        margin-bottom: @padding-small-vertical;
+      }
+    }
+
+    .instruction-input {
+      width: 100%;
+      resize: vertical;
+      font-size: @font-size-small;
+      line-height: 1.4;
+      color: @text-color;
+      background: @background-primary;
+      border: 1px solid @border-color-divider;
+      border-radius: 3px;
+      padding: @padding-small-vertical @padding-small-horizontal;
+      box-sizing: border-box;
+
+      &:focus {
+        border-color: @accent-primary;
+        outline: none;
+      }
+    }
+
+    .panel-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: @padding-small-horizontal;
+      margin-top: @padding-small-vertical;
     }
 }
 

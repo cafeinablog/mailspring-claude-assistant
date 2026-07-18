@@ -1,5 +1,6 @@
 import { React, ReactDOM, PropTypes } from "mailspring-exports";
 import { htmlToPlainText } from "./thread-text";
+import { improveDraft } from "./claude-client";
 
 /*
  * Botón "Mejorar con Claude" en la barra de acciones del compositor.
@@ -7,9 +8,8 @@ import { htmlToPlainText } from "./thread-text";
  * DEV-07: registro del botón (rol Composer:ActionButton).
  * DEV-08: lectura del texto plano del borrador actual (draft.body es HTML;
  *   se convierte con htmlToPlainText, sin tocar nunca el HTML del editor).
- *   Como verificación, el texto extraído se muestra en un panel flotante.
- * DEV-09/10 (pendientes): campo de instrucción libre + llamada a Claude +
- *   vista previa con Aplicar / Descartar.
+ * DEV-09: campo de instrucción libre + llamada a Claude (borrador + instrucción).
+ * DEV-10 (pendiente): Aplicar (reemplaza el texto del editor) / Descartar.
  */
 export default class ImproveDraftButton extends React.Component {
   static displayName = "ClaudeImproveDraftButton";
@@ -21,7 +21,16 @@ export default class ImproveDraftButton extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { open: false, extracted: null, panelPos: null };
+    // stage: "input" | "loading" | "preview" | "error" (solo aplica con open)
+    this.state = {
+      open: false,
+      stage: "input",
+      extracted: null,
+      instruction: "",
+      improved: null,
+      error: null,
+      panelPos: null,
+    };
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -30,9 +39,13 @@ export default class ImproveDraftButton extends React.Component {
     return nextState !== this.state || nextProps.session !== this.props.session;
   }
 
+  componentWillUnmount() {
+    this._unmounted = true;
+  }
+
   _onClick = event => {
     if (this.state.open) {
-      this.setState({ open: false, extracted: null, panelPos: null });
+      this._closePanel();
       return;
     }
     // El panel se ancla a la ventana (position: fixed) porque la barra de
@@ -46,28 +59,114 @@ export default class ImproveDraftButton extends React.Component {
     // DEV-08: extraer el texto plano del borrador. Se quitan las citas del
     // mensaje al que se responde (el usuario mejora SU texto, no la cita).
     const text = htmlToPlainText(this.props.draft.body || "");
-    this.setState({ open: true, extracted: text, panelPos });
+    this.setState({
+      open: true,
+      stage: "input",
+      extracted: text,
+      improved: null,
+      error: null,
+      panelPos,
+    });
   };
 
-  _renderPanel() {
-    const { extracted, panelPos } = this.state;
+  _closePanel = () => {
+    this.setState({ open: false, stage: "input", extracted: null, improved: null, error: null });
+  };
+
+  _onImprove = async () => {
+    const { extracted, instruction } = this.state;
+    if (!instruction.trim() || !extracted || !extracted.trim()) {
+      return;
+    }
+    this.setState({ stage: "loading", improved: null, error: null });
+    try {
+      const improved = await improveDraft(extracted, instruction.trim());
+      if (this._unmounted || !this.state.open) return;
+      this.setState({ stage: "preview", improved });
+    } catch (err) {
+      if (this._unmounted || !this.state.open) return;
+      this.setState({ stage: "error", error: err.message });
+    }
+  };
+
+  _onInstructionKeyDown = event => {
+    // Enter envía; Shift+Enter hace salto de línea; Escape cierra.
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      this._onImprove();
+    } else if (event.key === "Escape") {
+      this._closePanel();
+    }
+  };
+
+  _renderInput() {
+    const { extracted, instruction } = this.state;
     const empty = !extracted || !extracted.trim();
+    if (empty) {
+      return (
+        <div className="panel-body empty">
+          El borrador está vacío. Escribe algo y vuelve a intentarlo.
+        </div>
+      );
+    }
     return (
-      <div className="claude-improve-panel" style={panelPos}>
-        <div className="panel-header">
-          <span className="panel-title">Claude · texto del borrador (DEV-08)</span>
+      <div>
+        <div className="panel-body draft-preview">{extracted}</div>
+        <textarea
+          className="instruction-input"
+          placeholder='¿Cómo lo mejoro? ej. "hazlo más formal", "acórtalo"'
+          value={instruction}
+          autoFocus
+          rows={2}
+          onChange={e => this.setState({ instruction: e.target.value })}
+          onKeyDown={this._onInstructionKeyDown}
+        />
+        <div className="panel-actions">
           <button
-            className="btn panel-close"
-            onClick={() => this.setState({ open: false, extracted: null })}
+            className="btn btn-emphasis"
+            disabled={!instruction.trim()}
+            onClick={this._onImprove}
           >
+            Mejorar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  _renderBody() {
+    const { stage, improved, error } = this.state;
+    if (stage === "loading") {
+      return <div className="panel-body loading">Mejorando el borrador con Claude…</div>;
+    }
+    if (stage === "error") {
+      return (
+        <div>
+          <div className="panel-body error">{error}</div>
+          <div className="panel-actions">
+            <button className="btn" onClick={() => this.setState({ stage: "input", error: null })}>
+              Volver
+            </button>
+          </div>
+        </div>
+      );
+    }
+    if (stage === "preview") {
+      return <div className="panel-body">{improved}</div>;
+    }
+    return this._renderInput();
+  }
+
+  _renderPanel() {
+    return (
+      <div className="claude-improve-panel" style={this.state.panelPos}>
+        <div className="panel-header">
+          <span className="panel-title">Mejorar con Claude</span>
+          <button className="btn panel-close" onClick={this._closePanel}>
             ✕
           </button>
         </div>
-        <div className={`panel-body${empty ? " empty" : ""}`}>
-          {empty
-            ? "El borrador está vacío. Escribe algo y vuelve a intentarlo."
-            : extracted}
-        </div>
+        {this._renderBody()}
       </div>
     );
   }

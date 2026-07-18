@@ -1,40 +1,20 @@
 @import "ui-variables";
 @import "ui-mixins";
 
-.claude-improve-draft {
-  position: relative;
-  display: inline-block;
-}
-
-// Nivel superior: el panel se monta vía portal en document.body,
-// no como hijo de .claude-improve-draft.
-.claude-improve-panel {
-    // Anclado a la ventana; left/bottom llegan por estilo inline desde el
-    // componente (la barra de acciones recorta a los hijos absolutos).
-    position: fixed;
-    z-index: 1000;
+// UI-03: el contenido vive dentro del FixedPopover nativo de Mailspring
+// (Actions.openPopover), que aporta fondo, borde, sombra y posición — aquí
+// solo se estila el interior, para que sea consistente con el popup de
+// Plantillas.
+.claude-improve-popover {
     width: 420px;
     max-width: 70vw;
-    background: @background-primary;
-    border: 1px solid @border-color-divider;
-    border-radius: 4px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
     padding: @padding-small-vertical @padding-base-horizontal;
 
-    .panel-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .panel-title {
+      font-size: @font-size-small;
+      font-weight: 600;
+      color: @text-color-very-subtle;
       margin-bottom: @padding-small-vertical;
-
-      .panel-title {
-        font-size: @font-size-small;
-        font-weight: 600;
-        color: @text-color-very-subtle;
-      }
-      .panel-close {
-        padding: 0 6px;
-      }
     }
 
     .panel-body {

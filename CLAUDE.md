@@ -40,6 +40,15 @@ No es un producto público. No se publica en ninguna galería de plugins por aho
 - **Modelo(s) de Claude:** por definir en fase de features. Evaluar modelo económico para resumen
   vs. modelo de mayor calidad para redacción, revisando precios vigentes al implementar.
 
+## Ideas futuras (alcance separado — NO trabajar sin que Daniel lo pida)
+
+- **Redactar con Claude (idea de Daniel, S04):** tercera función, dentro o junto a "Mejorar con
+  Claude". El usuario da un resumen/brief de lo que quiere decir; si el borrador es respuesta a un
+  hilo, Claude lee además el hilo completo (reutilizar `getFocusedThreadPlainText` de DEV-04) y
+  propone una redacción completa manteniendo el tono y el contexto de la conversación. Reutiliza la
+  vista previa Aplicar/Descartar de DEV-10. Definir en su momento: botón propio vs. modo dentro del
+  panel actual, y cómo distinguir "mejorar lo escrito" de "redactar desde un brief".
+
 ## Pendientes de diseño (abiertos, para fase DES)
 
 - **Ubicación del panel de resumen (feedback de Daniel, S03):** el rol

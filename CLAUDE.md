@@ -66,6 +66,13 @@ Pulido de UI de S04 (icono de pestaña, botón-icono del compositor, popover nat
 en UI-01/02/03; nota técnica: el protocolo `mailspring://` sirve sin Content-Type, así que los
 iconos SVG del plugin van como **data-URI base64** (Chromium no acepta SVG como imagen sin MIME).
 
+## Pendiente de pulido (para S05)
+
+- **UI-04** · Espaciado interno de la caja de resumen: los botones "Regenerar" y "Ocultar" (y el
+  contenido en general) se ven pegados al borde de la caja. Dar más aire — comparar con el botón
+  "Responder" de los mensajes, que respira más. Revisar el padding de `.cs-head` (arriba/derecha)
+  en `styles/main.less` y/o margen de los botones. Solo estético; la funcionalidad está lista.
+
 ## Estructura y build
 
 - `src/` — código fuente TypeScript/JSX. **Se edita aquí.**

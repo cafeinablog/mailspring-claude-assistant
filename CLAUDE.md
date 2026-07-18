@@ -15,7 +15,10 @@ gestor de contraseñas de Daniel. En código y documentación usar siempre place
 Plugin **personal** de Mailspring (cliente de correo open source, Electron + React; Daniel usa
 cuentas Gmail, Google Workspace y Office 365) que integra la API de Claude para dos funciones:
 
-1. **Resumir hilo** — botón en la vista del hilo que genera un resumen de todos los mensajes.
+1. **Resumir hilo** — recuadro de resumen en dos ubicaciones que comparten el mismo resultado:
+   la cabecera del hilo (rol `MessageListHeaders`) y el pie del compositor (rol `Composer:Footer`).
+   Un solo botón "Generar resumen" con un único modelo configurable (el detalle se sube cambiando
+   el modelo en Preferencias). El resumen se cachea por `threadId` en `localStorage`.
 2. **Mejorar respuesta** — botón en la barra del compositor que toma el texto plano del borrador +
    una instrucción libre de Daniel (ej. "hazlo más formal", "acórtalo") y devuelve una versión
    mejorada en un panel de vista previa, con opción de **Aplicar** o **Descartar**.
@@ -49,25 +52,19 @@ No es un producto público. No se publica en ninguna galería de plugins por aho
   vista previa Aplicar/Descartar de DEV-10. Definir en su momento: botón propio vs. modo dentro del
   panel actual, y cómo distinguir "mejorar lo escrito" de "redactar desde un brief".
 
-## Tareas de pulido de UI (feedback de Daniel, S04)
+## Ubicación del panel de resumen (RESUELTO S04)
 
-- **UI-01** · Icono propio para la pestaña "Claude" en Preferencias (hoy usa el fallback de
-  "General"). El tab bar busca `icon-preferences-<tabId>.png` solo en `static/images` de la app,
-  así que se inyecta vía CSS (`content: url(...)`) apuntando a un asset del plugin servido por
-  `mailspring://mailspring-claude-assistant/...`.
-- **UI-02** · Botón "Mejorar con Claude" del compositor como icono, mismo estilo que el resto de
-  la barra (patrón `template-picker`: `btn btn-toolbar` + icono monocromo).
-- **UI-03** · Homologar el popup de "Mejorar con Claude" con el de Plantillas: usar el sistema
-  nativo `Actions.openPopover(componente, { originRect, direction: 'up' })` en lugar del panel
-  flotante propio con portal.
+Se descartó `MessageListSidebar:ContactCard` (competía con el sidebar Pro, apretado). Decisión:
+mostrar el mismo recuadro en **dos** roles nativos que comparten caché — `MessageListHeaders`
+(cabecera del hilo, opción A) y `Composer:Footer` (pie del compositor, opción C). Se descartó
+poner algo debajo del área de respuesta: Mailspring no ofrece rol de inyección ahí.
+Módulos: `summary-store.js` (caché/LRU/dedupe/sync), `thread-summary-panel.jsx` (recuadro
+compartido), `thread-summary-header.jsx` (A), `composer-summary-footer.jsx` (C, carga por
+`threadId` con `DatabaseStore.findAll(Message)`).
 
-## Pendientes de diseño (abiertos, para fase DES)
-
-- **Ubicación del panel de resumen (feedback de Daniel, S03):** el rol
-  `MessageListSidebar:ContactCard` funciona pero compite con el sidebar de contactos integrado de
-  Mailspring y se ve apretado. Evaluar alternativas: panel arriba del hilo (p.ej. rol tipo header
-  del message list) u otro contenedor propio. La lógica de datos/API es independiente de dónde se
-  monte, así que DEV-04..06 no se bloquean por esto.
+Pulido de UI de S04 (icono de pestaña, botón-icono del compositor, popover nativo) ya implementado
+en UI-01/02/03; nota técnica: el protocolo `mailspring://` sirve sin Content-Type, así que los
+iconos SVG del plugin van como **data-URI base64** (Chromium no acepta SVG como imagen sin MIME).
 
 ## Estructura y build
 

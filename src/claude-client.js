@@ -19,22 +19,22 @@ const API_VERSION = "2023-06-01";
 // plugin. Todas editables desde Preferencias → Claude.
 export const CONFIG_KEYS = {
   apiKey: "mailspring-claude-assistant.apiKey",
-  modelSummaryFast: "mailspring-claude-assistant.modelSummaryFast",
-  modelSummaryDetailed: "mailspring-claude-assistant.modelSummaryDetailed",
+  modelSummary: "mailspring-claude-assistant.modelSummary",
   modelImprove: "mailspring-claude-assistant.modelImprove",
   defaultInstruction: "mailspring-claude-assistant.defaultInstruction",
 };
 
-// Modelos por defecto por tarea (decisión S03). Configurables en DEV-11.
+// Modelos por defecto por tarea. Configurables en Preferencias → Claude.
+// El resumen usa por defecto el modelo económico (Haiku); quien quiera más
+// calidad/detalle cambia el modelo en Preferencias (decisión S04: un solo
+// botón "Generar resumen", el nivel de detalle se controla por el modelo).
 export const MODEL_DEFAULTS = {
-  summaryFast: "claude-haiku-4-5", // Resumen rápido
-  summaryDetailed: "claude-sonnet-5", // Resumen detallado
+  summary: "claude-haiku-4-5", // Resumen del hilo (económico por defecto)
   improveDraft: "claude-sonnet-5", // Mejorar respuesta (Fase 4)
 };
 
 const MODEL_CONFIG_KEY_BY_TASK = {
-  summaryFast: CONFIG_KEYS.modelSummaryFast,
-  summaryDetailed: CONFIG_KEYS.modelSummaryDetailed,
+  summary: CONFIG_KEYS.modelSummary,
   improveDraft: CONFIG_KEYS.modelImprove,
 };
 
@@ -140,21 +140,12 @@ const PLAIN_TEXT_RULE =
   "negritas; para viñetas usa un guion simple (-) y para títulos de sección usa " +
   "MAYÚSCULAS seguidas de dos puntos.";
 
-const SUMMARY_SYSTEM_FAST =
+const SUMMARY_SYSTEM =
   "Eres un asistente que resume hilos de correo electrónico. Responde siempre en el idioma " +
-  "predominante del hilo. Produce un resumen breve y accionable: 1-2 oraciones de contexto, " +
-  "puntos clave en viñetas, y al final una línea 'Pendientes:' con las acciones abiertas y " +
-  "quién debe hacerlas (si las hay). Ignora firmas, avisos legales y texto repetido. " +
-  "No inventes información que no esté en el hilo." +
-  PLAIN_TEXT_RULE;
-
-const SUMMARY_SYSTEM_DETAILED =
-  "Eres un asistente que resume hilos de correo electrónico. Responde siempre en el idioma " +
-  "predominante del hilo. Produce un resumen completo y bien organizado: contexto y propósito " +
-  "del hilo, cronología de lo discutido (qué dijo cada participante y cuándo, si es relevante), " +
-  "decisiones tomadas, y una sección final 'Pendientes:' con acciones abiertas, responsables y " +
-  "fechas mencionadas. Ignora firmas, avisos legales y texto repetido. " +
-  "No inventes información que no esté en el hilo." +
+  "predominante del hilo. Produce un resumen claro y accionable: una o dos oraciones de contexto, " +
+  "los puntos clave en viñetas (qué se discutió y qué se decidió), y al final una línea " +
+  "'Pendientes:' con las acciones abiertas y quién debe hacerlas (si las hay). Ignora firmas, " +
+  "avisos legales y texto repetido. No inventes información que no esté en el hilo." +
   PLAIN_TEXT_RULE;
 
 const IMPROVE_SYSTEM =
@@ -176,12 +167,13 @@ export function improveDraft(draftText, instruction) {
   });
 }
 
-// DEV-05: resumen del hilo. `detailed` elige modelo y estilo.
-export function summarizeThread(threadText, { detailed = false } = {}) {
+// DEV-05 / S04: resumen del hilo. Un solo modelo (configurable) y un solo
+// prompt; la profundidad se ajusta cambiando el modelo en Preferencias.
+export function summarizeThread(threadText) {
   return callClaude({
-    model: detailed ? getModel("summaryDetailed") : getModel("summaryFast"),
-    system: detailed ? SUMMARY_SYSTEM_DETAILED : SUMMARY_SYSTEM_FAST,
+    model: getModel("summary"),
+    system: SUMMARY_SYSTEM,
     userText: `Resume este hilo de correo:\n\n${threadText}`,
-    maxTokens: detailed ? 2048 : 1024,
+    maxTokens: 1536,
   });
 }

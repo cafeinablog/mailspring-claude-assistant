@@ -24,8 +24,7 @@ const MODEL_OPTIONS = [
 ];
 
 const MODEL_FIELDS = [
-  { key: CONFIG_KEYS.modelSummaryFast, task: "summaryFast", label: "Resumen rápido" },
-  { key: CONFIG_KEYS.modelSummaryDetailed, task: "summaryDetailed", label: "Resumen detallado" },
+  { key: CONFIG_KEYS.modelSummary, task: "summary", label: "Resumen del hilo" },
   { key: CONFIG_KEYS.modelImprove, task: "improveDraft", label: "Mejorar respuesta" },
 ];
 
@@ -105,6 +104,10 @@ export default class PreferencesClaude extends React.Component {
         <section>
           <h6>MODELOS</h6>
           {MODEL_FIELDS.map(field => this._renderModelSelect(field))}
+          <div className="pref-note">
+            El resumen usa un solo modelo. Para resúmenes más detallados, elige un modelo de mayor
+            calidad (Sonnet u Opus); para ahorrar, Haiku.
+          </div>
         </section>
 
         <section>

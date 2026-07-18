@@ -49,6 +49,18 @@ No es un producto público. No se publica en ninguna galería de plugins por aho
   vista previa Aplicar/Descartar de DEV-10. Definir en su momento: botón propio vs. modo dentro del
   panel actual, y cómo distinguir "mejorar lo escrito" de "redactar desde un brief".
 
+## Tareas de pulido de UI (feedback de Daniel, S04)
+
+- **UI-01** · Icono propio para la pestaña "Claude" en Preferencias (hoy usa el fallback de
+  "General"). El tab bar busca `icon-preferences-<tabId>.png` solo en `static/images` de la app,
+  así que se inyecta vía CSS (`content: url(...)`) apuntando a un asset del plugin servido por
+  `mailspring://mailspring-claude-assistant/...`.
+- **UI-02** · Botón "Mejorar con Claude" del compositor como icono, mismo estilo que el resto de
+  la barra (patrón `template-picker`: `btn btn-toolbar` + icono monocromo).
+- **UI-03** · Homologar el popup de "Mejorar con Claude" con el de Plantillas: usar el sistema
+  nativo `Actions.openPopover(componente, { originRect, direction: 'up' })` en lugar del panel
+  flotante propio con portal.
+
 ## Pendientes de diseño (abiertos, para fase DES)
 
 - **Ubicación del panel de resumen (feedback de Daniel, S03):** el rol

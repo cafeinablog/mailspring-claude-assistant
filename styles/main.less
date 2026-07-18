@@ -97,6 +97,14 @@
     }
 }
 
+// UI-01: icono propio para la pestaña "Claude" en Preferencias. El tab bar
+// solo busca iconos por nombre en static/images de la app (imageNamed), así
+// que se reemplaza el contenido del <img> del fallback vía CSS con un asset
+// del plugin (servido por el protocolo mailspring://).
+.preferences-tabs .item[aria-label="Claude"] img.tab-icon {
+  content: url("mailspring://mailspring-claude-assistant/assets/icon-preferences-claude.svg");
+}
+
 // DEV-11: pestaña "Claude" en Preferencias.
 .container-claude-preferences {
   max-width: 620px;

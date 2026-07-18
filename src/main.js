@@ -2,6 +2,7 @@ import { ComponentRegistry, PreferencesUIStore } from 'mailspring-exports';
 
 import ImproveDraftButton from './improve-draft-button';
 import ThreadSummaryHeader from './thread-summary-header';
+import ComposerSummaryFooter from './composer-summary-footer';
 
 let preferencesTab = null;
 
@@ -17,6 +18,10 @@ export function activate() {
   // reemplaza a la antigua tarjeta del sidebar de contactos).
   ComponentRegistry.register(ThreadSummaryHeader, {
     role: 'MessageListHeaders',
+  });
+  // Opción C: mismo recuadro dentro del compositor (comparte caché con A).
+  ComponentRegistry.register(ComposerSummaryFooter, {
+    role: 'Composer:Footer',
   });
   // DEV-11: pestaña "Claude" en Preferencias (patrón composer-templates).
   preferencesTab = new PreferencesUIStore.TabItem({
@@ -41,6 +46,7 @@ export function serialize() {}
 export function deactivate() {
   ComponentRegistry.unregister(ImproveDraftButton);
   ComponentRegistry.unregister(ThreadSummaryHeader);
+  ComponentRegistry.unregister(ComposerSummaryFooter);
   if (preferencesTab) {
     PreferencesUIStore.unregisterPreferencesTab(preferencesTab.tabId);
     preferencesTab = null;

@@ -1,5 +1,5 @@
 import { React, ReactDOM, PropTypes } from "mailspring-exports";
-import { htmlToPlainText } from "./thread-text";
+import { htmlToPlainText, plainTextToDraftHtml } from "./thread-text";
 import { improveDraft } from "./claude-client";
 
 /*
@@ -9,7 +9,10 @@ import { improveDraft } from "./claude-client";
  * DEV-08: lectura del texto plano del borrador actual (draft.body es HTML;
  *   se convierte con htmlToPlainText, sin tocar nunca el HTML del editor).
  * DEV-09: campo de instrucción libre + llamada a Claude (borrador + instrucción).
- * DEV-10 (pendiente): Aplicar (reemplaza el texto del editor) / Descartar.
+ * DEV-10: vista previa con Aplicar / Descartar. Aplicar reemplaza SOLO el texto
+ *   del usuario: se corta el body actual en el primer marcador de firma o cita
+ *   ('<signature', gmail_quote) y se conserva esa cola intacta — mismo patrón
+ *   que el plugin interno composer-templates (verificado en el asar 1.22.0).
  */
 export default class ImproveDraftButton extends React.Component {
   static displayName = "ClaudeImproveDraftButton";
@@ -89,6 +92,36 @@ export default class ImproveDraftButton extends React.Component {
     }
   };
 
+  // DEV-10: reemplaza el texto del usuario en el editor por la versión mejorada,
+  // conservando intactas la firma y la cita del mensaje original.
+  _onApply = () => {
+    const { improved } = this.state;
+    const { session } = this.props;
+    // Se lee el body vigente de la sesión (no de props, que puede estar viejo
+    // por el shouldComponentUpdate), igual que hace composer-templates.
+    const current = session.draft().body || "";
+    let insertion = current.length;
+    for (const marker of [
+      "<signature",
+      '<div class="gmail_quote_attribution"',
+      '<blockquote class="gmail_quote"',
+    ]) {
+      const i = current.indexOf(marker);
+      if (i !== -1) {
+        insertion = Math.min(insertion, i);
+      }
+    }
+    const html = plainTextToDraftHtml(improved);
+    session.changes.add({ body: `${html}${current.substr(insertion)}` });
+    this._closePanel();
+  };
+
+  // Descartar vuelve a la etapa de instrucción (conservándola) para poder
+  // ajustar y reintentar sin re-escribirla.
+  _onDiscard = () => {
+    this.setState({ stage: "input", improved: null });
+  };
+
   _onInstructionKeyDown = event => {
     // Enter envía; Shift+Enter hace salto de línea; Escape cierra.
     if (event.key === "Enter" && !event.shiftKey) {
@@ -152,7 +185,19 @@ export default class ImproveDraftButton extends React.Component {
       );
     }
     if (stage === "preview") {
-      return <div className="panel-body">{improved}</div>;
+      return (
+        <div>
+          <div className="panel-body">{improved}</div>
+          <div className="panel-actions">
+            <button className="btn" onClick={this._onDiscard}>
+              Descartar
+            </button>
+            <button className="btn btn-emphasis" onClick={this._onApply}>
+              Aplicar
+            </button>
+          </div>
+        </div>
+      );
     }
     return this._renderInput();
   }

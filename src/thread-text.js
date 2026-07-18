@@ -43,6 +43,17 @@ export function htmlToPlainText(html) {
     .trim();
 }
 
+// DEV-10: convierte el texto plano devuelto por Claude al HTML mínimo que
+// acepta el editor del compositor (texto escapado + <br/>). No es
+// "manipular HTML": solo se genera el envoltorio más simple posible.
+export function plainTextToDraftHtml(text) {
+  const escaped = (text || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  return `<div>${escaped.replace(/\n/g, "<br/>")}</div>`;
+}
+
 function contactLabel(contact) {
   if (!contact) {
     return "(desconocido)";

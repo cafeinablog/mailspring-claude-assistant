@@ -1,4 +1,4 @@
-import { summarizeThread } from "./claude-client";
+import { summarizeThread, getModel } from "./claude-client";
 
 /*
  * DEV-12: store de resúmenes del hilo, compartido por la opción A
@@ -96,12 +96,13 @@ class SummaryStore {
     if (this._inflight[threadId]) {
       return this._inflight[threadId];
     }
+    const model = getModel("summary"); // el modelo realmente usado, para la meta
     this._notify(); // para que la UI muestre "Generando…" de inmediato
     const promise = summarizeThread(threadData.text)
       .then(text => {
         const entry = {
           text,
-          model: (threadData && threadData.model) || null,
+          model,
           generatedAt: Date.now(),
           messageCount: threadData.messageCount || 0,
         };

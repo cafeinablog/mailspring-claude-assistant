@@ -62,6 +62,20 @@ function contactLabel(contact) {
   return name && name !== contact.email ? `${name} <${contact.email}>` : contact.email;
 }
 
+// Construye el texto plano de un hilo a partir de su asunto y una lista de
+// mensajes (ya sin borradores). Compartido por el hilo enfocado (MessageStore)
+// y por la opción A / C, que reciben los mensajes por otras vías.
+export function buildThreadText(subject, messages) {
+  const subj = subject || "(sin asunto)";
+  const parts = messages.map((msg, idx) => {
+    const from = contactLabel(msg.from && msg.from[0]);
+    const date = msg.date ? new Date(msg.date).toLocaleString() : "";
+    const body = htmlToPlainText(msg.body) || (msg.snippet || "").trim();
+    return `[Mensaje ${idx + 1} de ${messages.length}] De: ${from} — ${date}\n${body}`;
+  });
+  return `Asunto: ${subj}\n\n${parts.join("\n\n---\n\n")}`;
+}
+
 // Devuelve { subject, messageCount, text } del hilo enfocado,
 // o null si no hay hilo abierto / los mensajes siguen cargando.
 export function getFocusedThreadPlainText() {
@@ -73,17 +87,9 @@ export function getFocusedThreadPlainText() {
   if (messages.length === 0) {
     return null;
   }
-
-  const parts = messages.map((msg, idx) => {
-    const from = contactLabel(msg.from && msg.from[0]);
-    const date = msg.date ? new Date(msg.date).toLocaleString() : "";
-    const body = htmlToPlainText(msg.body) || (msg.snippet || "").trim();
-    return `[Mensaje ${idx + 1} de ${messages.length}] De: ${from} — ${date}\n${body}`;
-  });
-
   return {
     subject: thread.subject || "(sin asunto)",
     messageCount: messages.length,
-    text: `Asunto: ${thread.subject || "(sin asunto)"}\n\n${parts.join("\n\n---\n\n")}`,
+    text: buildThreadText(thread.subject, messages),
   };
 }

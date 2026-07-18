@@ -1,7 +1,7 @@
 import { ComponentRegistry, PreferencesUIStore } from 'mailspring-exports';
 
 import ImproveDraftButton from './improve-draft-button';
-import ThreadSummarySidebar from './thread-summary-sidebar';
+import ThreadSummaryHeader from './thread-summary-header';
 
 let preferencesTab = null;
 
@@ -13,9 +13,10 @@ export function activate() {
   ComponentRegistry.register(ImproveDraftButton, {
     role: 'Composer:ActionButton',
   });
-  // Tarjeta "Claude" con el botón "Resumir hilo" en el sidebar del hilo.
-  ComponentRegistry.register(ThreadSummarySidebar, {
-    role: 'MessageListSidebar:ContactCard',
+  // Opción A: recuadro de resumen en la cabecera del hilo (rol nativo,
+  // reemplaza a la antigua tarjeta del sidebar de contactos).
+  ComponentRegistry.register(ThreadSummaryHeader, {
+    role: 'MessageListHeaders',
   });
   // DEV-11: pestaña "Claude" en Preferencias (patrón composer-templates).
   preferencesTab = new PreferencesUIStore.TabItem({
@@ -39,7 +40,7 @@ export function serialize() {}
 //
 export function deactivate() {
   ComponentRegistry.unregister(ImproveDraftButton);
-  ComponentRegistry.unregister(ThreadSummarySidebar);
+  ComponentRegistry.unregister(ThreadSummaryHeader);
   if (preferencesTab) {
     PreferencesUIStore.unregisterPreferencesTab(preferencesTab.tabId);
     preferencesTab = null;

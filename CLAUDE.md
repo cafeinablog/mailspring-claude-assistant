@@ -40,6 +40,14 @@ No es un producto público. No se publica en ninguna galería de plugins por aho
 - **Modelo(s) de Claude:** por definir en fase de features. Evaluar modelo económico para resumen
   vs. modelo de mayor calidad para redacción, revisando precios vigentes al implementar.
 
+## Pendientes de diseño (abiertos, para fase DES)
+
+- **Ubicación del panel de resumen (feedback de Daniel, S03):** el rol
+  `MessageListSidebar:ContactCard` funciona pero compite con el sidebar de contactos integrado de
+  Mailspring y se ve apretado. Evaluar alternativas: panel arriba del hilo (p.ej. rol tipo header
+  del message list) u otro contenedor propio. La lógica de datos/API es independiente de dónde se
+  monte, así que DEV-04..06 no se bloquean por esto.
+
 ## Estructura y build
 
 - `src/` — código fuente TypeScript/JSX. **Se edita aquí.**

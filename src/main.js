@@ -1,16 +1,19 @@
 import { ComponentRegistry } from 'mailspring-exports';
 
 import MyComposerButton from './my-composer-button';
-import MyMessageSidebar from './my-message-sidebar';
+import ThreadSummarySidebar from './thread-summary-sidebar';
 
 // Activate is called when the package is loaded. If your package previously
 // saved state using `serialize` it is provided.
 //
 export function activate() {
+  // Botón de ejemplo del compositor — será reemplazado por "Mejorar
+  // respuesta" en DEV-07.
   ComponentRegistry.register(MyComposerButton, {
     role: 'Composer:ActionButton',
   });
-  ComponentRegistry.register(MyMessageSidebar, {
+  // Tarjeta "Claude" con el botón "Resumir hilo" en el sidebar del hilo.
+  ComponentRegistry.register(ThreadSummarySidebar, {
     role: 'MessageListSidebar:ContactCard',
   });
 }
@@ -28,5 +31,5 @@ export function serialize() {}
 //
 export function deactivate() {
   ComponentRegistry.unregister(MyComposerButton);
-  ComponentRegistry.unregister(MyMessageSidebar);
+  ComponentRegistry.unregister(ThreadSummarySidebar);
 }

@@ -1,6 +1,35 @@
 @import "ui-variables";
 @import "ui-mixins";
 
-.my-package .btn {
-  
+.claude-thread-summary {
+  padding: @padding-base-vertical @padding-base-horizontal;
+
+  .header h2 {
+    font-size: @font-size-small;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: @text-color-very-subtle;
+    margin: 0 0 @padding-small-vertical 0;
+  }
+
+  .summarize-btn {
+    width: 100%;
+  }
+
+  .summary-body {
+    margin-top: @padding-small-vertical * 2;
+    font-size: @font-size-small;
+    line-height: 1.5;
+    color: @text-color;
+    white-space: pre-wrap;
+
+    &.loading {
+      color: @text-color-very-subtle;
+      font-style: italic;
+    }
+
+    &.error {
+      color: @color-error;
+    }
+  }
 }

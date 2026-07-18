@@ -5,6 +5,12 @@
 // de la UI usa las variables de tema de Mailspring.
 @claude-accent: #d97757;
 
+// Espejo de valores del message-list de Mailspring (no expuestos como
+// ui-variables): separación entre tarjetas y padding horizontal del cuerpo del
+// mensaje. Se replican para que la caja de resumen quede alineada con los hilos.
+@message-spacing: 6px;
+@message-h-padding: 20px;
+
 // UI-03: el contenido vive dentro del FixedPopover nativo de Mailspring
 // (Actions.openPopover), que aporta fondo, borde, sombra y posición — aquí
 // solo se estila el interior, para que sea consistente con el popup de
@@ -152,27 +158,33 @@
   }
 }
 
-// Recuadro de resumen del hilo (opciones A y C). Gris neutro nativo; el único
-// color propio es el ✳ coral. Se monta tanto en la cabecera del hilo como en
-// el pie del compositor, de ahí el margen propio.
+// Recuadro de resumen del hilo (opciones A y C). Se ancla al estilo de las
+// filas de mensaje: fondo blanco (@background-primary) + la misma sombra sutil,
+// esquinas rectas y padding lateral de 20px como el cuerpo de los mensajes. El
+// único color propio es la barra izquierda coral y el ✳, para leerse como "de
+// Claude" sin parecer una alerta.
 .claude-summary-panel {
-  margin: @padding-small-vertical @padding-base-horizontal;
-  border: 1px solid @border-color-divider;
-  border-radius: 4px;
-  background: @background-secondary;
+  margin: @message-spacing 0 @padding-large-vertical;
+  background: @background-primary;
+  box-shadow: 0 0 0.5px rgba(0, 0, 0, 0.28), 0 1px 1.5px rgba(0, 0, 0, 0.08);
+  border-left: 3px solid @claude-accent;
   overflow: hidden;
+
+  // En el compositor lleva margen lateral para no pegarse al borde interno.
+  &.in-composer {
+    margin: @message-spacing @padding-base-horizontal @padding-large-vertical;
+  }
 
   .cs-head {
     display: flex;
     align-items: center;
     gap: @padding-small-horizontal;
-    padding: @padding-small-vertical @padding-small-horizontal;
+    padding: @padding-large-vertical @message-h-padding;
   }
 
   .cs-title {
-    font-size: @font-size-small;
     font-weight: 600;
-    color: @text-color-subtle;
+    color: @text-color;
   }
   .cs-sun {
     color: @claude-accent;
@@ -181,22 +193,14 @@
   .cs-grow {
     flex: 1;
   }
-  .cs-btn {
-    font-size: @font-size-smaller;
-    padding: 2px 10px;
-  }
-  .cs-toggle {
-    flex: 0 0 auto;
-  }
 
   .cs-body {
-    padding: 0 @padding-small-horizontal @padding-small-vertical;
-    font-size: @font-size-small;
+    padding: 0 @message-h-padding @padding-base-vertical;
     line-height: 1.5;
     color: @text-color;
     white-space: pre-wrap;
     word-wrap: break-word;
-    max-height: 320px;
+    max-height: 360px;
     overflow-y: auto;
 
     &.cs-muted {
@@ -209,13 +213,13 @@
   }
 
   .cs-meta {
-    padding: 0 @padding-small-horizontal @padding-small-vertical;
+    padding: 0 @message-h-padding @padding-base-vertical;
     font-size: @font-size-smaller;
     color: @text-color-very-subtle;
   }
 
   .cs-stale {
-    padding: 0 @padding-small-horizontal @padding-small-vertical;
+    padding: 0 @message-h-padding @padding-base-vertical;
     font-size: @font-size-smaller;
     color: @text-color-subtle;
     font-style: italic;

@@ -39,6 +39,9 @@ export default class ThreadSummaryPanel extends React.Component {
     threadId: PropTypes.string,
     messageCount: PropTypes.number,
     getThreadData: PropTypes.func.isRequired,
+    // "header" (cabecera del hilo) | "composer" (pie del compositor). Solo
+    // cambia el margen; el resto del estilo es idéntico.
+    variant: PropTypes.string,
   };
 
   constructor(props) {
@@ -92,32 +95,32 @@ export default class ThreadSummaryPanel extends React.Component {
     const newMsgs = store.newMessagesSince(threadId, messageCount);
     const { collapsed, error } = this.state;
 
+    const rootClass = `claude-summary-panel${
+      this.props.variant === "composer" ? " in-composer" : ""
+    }`;
+
     return (
-      <div className="claude-summary-panel">
+      <div className={rootClass}>
         <div className="cs-head">
           <span className="cs-title">
             <span className="cs-sun">✳</span> Resumen del hilo
           </span>
           <span className="cs-grow" />
           {generating ? (
-            <button className="btn cs-btn" disabled>
+            <button className="btn" disabled>
               Generando…
             </button>
           ) : entry ? (
-            <button className="btn cs-btn" onClick={this._onGenerate}>
+            <button className="btn" onClick={this._onGenerate}>
               {newMsgs > 0 ? `Actualizar (${newMsgs} ${newMsgs === 1 ? "nuevo" : "nuevos"})` : "Regenerar"}
             </button>
           ) : (
-            <button className="btn btn-emphasis cs-btn" onClick={this._onGenerate}>
+            <button className="btn" onClick={this._onGenerate}>
               Generar resumen
             </button>
           )}
           {entry && !generating && (
-            <button
-              className="btn cs-btn cs-toggle"
-              onClick={this._toggleCollapsed}
-              aria-expanded={!collapsed}
-            >
+            <button className="btn" onClick={this._toggleCollapsed} aria-expanded={!collapsed}>
               {collapsed ? "Mostrar ▸" : "Ocultar ▾"}
             </button>
           )}

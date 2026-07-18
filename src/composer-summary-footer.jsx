@@ -81,6 +81,7 @@ export default class ComposerSummaryFooter extends React.Component {
         threadId={this.props.threadId}
         messageCount={this.state.messageCount}
         getThreadData={this._getThreadData}
+        variant="composer"
       />
     );
   }

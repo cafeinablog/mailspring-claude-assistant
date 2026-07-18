@@ -1,13 +1,15 @@
 import { React } from "mailspring-exports";
 import { getFocusedThreadPlainText } from "./thread-text";
+import { summarizeThread } from "./claude-client";
 
 /*
- * Sidebar del hilo: tarjeta "Claude" con el botón "Resumir hilo".
+ * Sidebar del hilo: tarjeta "Claude" con dos botones de resumen.
  *
- * DEV-03: UI del botón y estados del panel (idle / loading / done / error).
- * DEV-04: al hacer click se extrae el texto plano real del hilo enfocado
- * (MessageStore) y se muestra como verificación. En DEV-05 ese texto se
- * mandará a la API de Claude y el panel mostrará el resumen.
+ * DEV-03: UI y estados del panel (idle / loading / done / error).
+ * DEV-04: extracción de texto plano del hilo (MessageStore).
+ * DEV-05/06: llamada real a la API de Claude y panel de resultado.
+ *   - Resumen rápido → Haiku 4.5 (económico)
+ *   - Resumen detallado → Sonnet 5 (más calidad)
  */
 export default class ThreadSummarySidebar extends React.Component {
   static displayName = "ClaudeThreadSummary";
@@ -15,34 +17,42 @@ export default class ThreadSummarySidebar extends React.Component {
   constructor(props) {
     super(props);
     // status: "idle" | "loading" | "done" | "error"
-    this.state = { status: "idle", summary: null, error: null };
+    // mode: "fast" | "detailed" (cuál botón disparó la carga)
+    this.state = { status: "idle", mode: null, summary: null, error: null };
+    this._mounted = false;
   }
 
-  _onSummarize = () => {
-    this.setState({ status: "loading", summary: null, error: null });
+  componentDidMount() {
+    this._mounted = true;
+  }
 
-    // DEV-04: extrae el texto plano del hilo y lo muestra como verificación.
-    // En DEV-05 este texto se mandará a la API de Claude.
+  componentWillUnmount() {
+    this._mounted = false;
+  }
+
+  _onSummarize = async detailed => {
+    const mode = detailed ? "detailed" : "fast";
     const extracted = getFocusedThreadPlainText();
     if (!extracted) {
       this.setState({
         status: "error",
-        error: "No hay un hilo abierto (o sus mensajes siguen cargando). Abre un hilo e inténtalo de nuevo.",
+        mode,
+        summary: null,
+        error:
+          "No hay un hilo abierto (o sus mensajes siguen cargando). Abre un hilo e inténtalo de nuevo.",
       });
       return;
     }
 
-    const MAX_PREVIEW = 2000;
-    const preview =
-      extracted.text.length > MAX_PREVIEW
-        ? `${extracted.text.slice(0, MAX_PREVIEW)}\n\n… (${extracted.text.length} caracteres en total)`
-        : extracted.text;
-
-    this.setState({
-      status: "done",
-      summary:
-        `(DEV-04: texto plano extraído — ${extracted.messageCount} mensajes)\n\n${preview}`,
-    });
+    this.setState({ status: "loading", mode, summary: null, error: null });
+    try {
+      const summary = await summarizeThread(extracted.text, { detailed });
+      if (!this._mounted) return;
+      this.setState({ status: "done", mode, summary });
+    } catch (err) {
+      if (!this._mounted) return;
+      this.setState({ status: "error", mode, error: err.message });
+    }
   };
 
   _renderBody() {
@@ -60,7 +70,8 @@ export default class ThreadSummarySidebar extends React.Component {
   }
 
   render() {
-    const { status } = this.state;
+    const { status, mode } = this.state;
+    const loading = status === "loading";
     return (
       <div className="claude-thread-summary">
         <div className="header">
@@ -68,10 +79,17 @@ export default class ThreadSummarySidebar extends React.Component {
         </div>
         <button
           className="btn btn-emphasis summarize-btn"
-          disabled={status === "loading"}
-          onClick={this._onSummarize}
+          disabled={loading}
+          onClick={() => this._onSummarize(false)}
         >
-          {status === "loading" ? "Resumiendo…" : "Resumir hilo"}
+          {loading && mode === "fast" ? "Resumiendo…" : "Resumen rápido"}
+        </button>
+        <button
+          className="btn summarize-btn"
+          disabled={loading}
+          onClick={() => this._onSummarize(true)}
+        >
+          {loading && mode === "detailed" ? "Resumiendo…" : "Resumen detallado"}
         </button>
         {this._renderBody()}
       </div>

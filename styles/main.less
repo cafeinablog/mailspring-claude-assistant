@@ -10,6 +10,13 @@
     max-width: 70vw;
     padding: @padding-small-vertical @padding-base-horizontal;
 
+    // El contenedor es enfocable (tabIndex -1) para el cierre por blur del
+    // FixedPopover; sin esto no se cierra al hacer clic fuera cuando el
+    // borrador está vacío. El anillo de foco no aporta nada aquí.
+    &:focus {
+      outline: none;
+    }
+
     .panel-title {
       font-size: @font-size-small;
       font-weight: 600;
@@ -79,10 +86,12 @@
 
 // UI-01: icono propio para la pestaña "Claude" en Preferencias. El tab bar
 // solo busca iconos por nombre en static/images de la app (imageNamed), así
-// que se reemplaza el contenido del <img> del fallback vía CSS con un asset
-// del plugin (servido por el protocolo mailspring://).
+// que se reemplaza el contenido del <img> del fallback vía CSS. Va como
+// data-URI porque el protocolo mailspring:// sirve archivos sin Content-Type
+// y Chromium no acepta SVG como imagen sin su MIME (la fuente editable es
+// assets/icon-preferences-claude.svg).
 .preferences-tabs .item[aria-label="Claude"] img.tab-icon {
-  content: url("mailspring://mailspring-claude-assistant/assets/icon-preferences-claude.svg");
+  content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj4KICA8cmVjdCB4PSIxIiB5PSIxIiB3aWR0aD0iMzgiIGhlaWdodD0iMzgiIHJ4PSI5IiBmaWxsPSIjZDk3NzU3Ii8+CiAgPGcgc3Ryb2tlPSIjZmZmZmZmIiBzdHJva2Utd2lkdGg9IjMuMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxsaW5lIHgxPSIyNSIgeTE9IjIwIiB4Mj0iMzMiIHkyPSIyMCIvPgogICAgPGxpbmUgeDE9IjIzLjUiIHkxPSIyMy41IiB4Mj0iMjkuMiIgeTI9IjI5LjIiLz4KICAgIDxsaW5lIHgxPSIyMCIgeTE9IjI1IiB4Mj0iMjAiIHkyPSIzMyIvPgogICAgPGxpbmUgeDE9IjE2LjUiIHkxPSIyMy41IiB4Mj0iMTAuOCIgeTI9IjI5LjIiLz4KICAgIDxsaW5lIHgxPSIxNSIgeTE9IjIwIiB4Mj0iNyIgeTI9IjIwIi8+CiAgICA8bGluZSB4MT0iMTYuNSIgeTE9IjE2LjUiIHgyPSIxMC44IiB5Mj0iMTAuOCIvPgogICAgPGxpbmUgeDE9IjIwIiB5MT0iMTUiIHgyPSIyMCIgeTI9IjciLz4KICAgIDxsaW5lIHgxPSIyMy41IiB5MT0iMTYuNSIgeDI9IjI5LjIiIHkyPSIxMC44Ii8+CiAgPC9nPgo8L3N2Zz4K");
 }
 
 // DEV-11: pestaña "Claude" en Preferencias.

@@ -19,6 +19,14 @@ import { improveDraft, getDefaultInstruction } from "./claude-client";
  *   el popup de Plantillas) en lugar del panel flotante propio con portal.
  */
 
+// Icono del botón (sunburst) como data-URI: el protocolo mailspring:// sirve
+// los archivos SIN Content-Type y Chromium se niega a usar un SVG como imagen
+// sin su MIME, así que no se puede referenciar assets/icon-composer-claude.svg
+// (ese archivo queda como fuente editable). El data-URI sí trae el MIME.
+const COMPOSER_ICON_URL =
+  "data:image/svg+xml;base64," +
+  "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNyIgaGVpZ2h0PSIxNyIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICA8ZyBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMi42IiBzdHJva2UtbGluZWNhcD0icm91bmQiPgogICAgPGxpbmUgeDE9IjE3LjUiIHkxPSIxMiIgeDI9IjIzIiB5Mj0iMTIiLz4KICAgIDxsaW5lIHgxPSIxNS45IiB5MT0iMTUuOSIgeDI9IjE5LjgiIHkyPSIxOS44Ii8+CiAgICA8bGluZSB4MT0iMTIiIHkxPSIxNy41IiB4Mj0iMTIiIHkyPSIyMyIvPgogICAgPGxpbmUgeDE9IjguMSIgeTE9IjE1LjkiIHgyPSI0LjIiIHkyPSIxOS44Ii8+CiAgICA8bGluZSB4MT0iNi41IiB5MT0iMTIiIHgyPSIxIiB5Mj0iMTIiLz4KICAgIDxsaW5lIHgxPSI4LjEiIHkxPSI4LjEiIHgyPSI0LjIiIHkyPSI0LjIiLz4KICAgIDxsaW5lIHgxPSIxMiIgeTE9IjYuNSIgeDI9IjEyIiB5Mj0iMSIvPgogICAgPGxpbmUgeDE9IjE1LjkiIHkxPSI4LjEiIHgyPSIxOS44IiB5Mj0iNC4yIi8+CiAgPC9nPgo8L3N2Zz4K";
+
 // Contenido del popover. Vive montado dentro del FixedPopover nativo de
 // Mailspring, que se encarga de posición, fondo, sombra y cierre (clic fuera
 // o Escape). Recibe el texto ya extraído y la sesión del borrador.
@@ -169,8 +177,12 @@ class ImproveDraftPopover extends React.Component {
     } else {
       body = this._renderInput();
     }
+    // tabIndex={-1}: el FixedPopover cierra por blur y su decorador
+    // auto-focuses solo enfoca 'input, textarea, [contenteditable], [tabIndex]'.
+    // Sin un elemento enfocable (estado "borrador vacío") el popover nunca
+    // recibía foco y el clic fuera no lo cerraba.
     return (
-      <div className="claude-improve-popover">
+      <div className="claude-improve-popover" tabIndex={-1}>
         <div className="panel-title">Mejorar con Claude</div>
         {body}
       </div>
@@ -212,11 +224,7 @@ export default class ImproveDraftButton extends React.Component {
         aria-label="Mejorar con Claude"
         onClick={this._onClick}
       >
-        <RetinaImg
-          url="mailspring://mailspring-claude-assistant/assets/icon-composer-claude.svg"
-          mode={RetinaImg.Mode.ContentIsMask}
-          aria-hidden="true"
-        />
+        <RetinaImg url={COMPOSER_ICON_URL} mode={RetinaImg.Mode.ContentIsMask} aria-hidden="true" />
       </button>
     );
   }

@@ -1,11 +1,13 @@
 import { React } from "mailspring-exports";
+import { getFocusedThreadPlainText } from "./thread-text";
 
 /*
  * Sidebar del hilo: tarjeta "Claude" con el botón "Resumir hilo".
  *
- * DEV-03: solo la UI del botón y los estados del panel (idle / loading /
- * summary / error) con contenido placeholder. La lectura real de los
- * mensajes del hilo llega en DEV-04 y la llamada a la API en DEV-05.
+ * DEV-03: UI del botón y estados del panel (idle / loading / done / error).
+ * DEV-04: al hacer click se extrae el texto plano real del hilo enfocado
+ * (MessageStore) y se muestra como verificación. En DEV-05 ese texto se
+ * mandará a la API de Claude y el panel mostrará el resumen.
  */
 export default class ThreadSummarySidebar extends React.Component {
   static displayName = "ClaudeThreadSummary";
@@ -17,22 +19,31 @@ export default class ThreadSummarySidebar extends React.Component {
   }
 
   _onSummarize = () => {
-    // Placeholder DEV-03: simula el ciclo loading -> done sin tocar
-    // MessageStore ni la API todavía.
     this.setState({ status: "loading", summary: null, error: null });
-    this._timer = setTimeout(() => {
-      this.setState({
-        status: "done",
-        summary:
-          "(Placeholder) Aquí aparecerá el resumen del hilo generado por Claude. " +
-          "La lectura de mensajes (DEV-04) y la llamada a la API (DEV-05) vienen después.",
-      });
-    }, 600);
-  };
 
-  componentWillUnmount() {
-    clearTimeout(this._timer);
-  }
+    // DEV-04: extrae el texto plano del hilo y lo muestra como verificación.
+    // En DEV-05 este texto se mandará a la API de Claude.
+    const extracted = getFocusedThreadPlainText();
+    if (!extracted) {
+      this.setState({
+        status: "error",
+        error: "No hay un hilo abierto (o sus mensajes siguen cargando). Abre un hilo e inténtalo de nuevo.",
+      });
+      return;
+    }
+
+    const MAX_PREVIEW = 2000;
+    const preview =
+      extracted.text.length > MAX_PREVIEW
+        ? `${extracted.text.slice(0, MAX_PREVIEW)}\n\n… (${extracted.text.length} caracteres en total)`
+        : extracted.text;
+
+    this.setState({
+      status: "done",
+      summary:
+        `(DEV-04: texto plano extraído — ${extracted.messageCount} mensajes)\n\n${preview}`,
+    });
+  };
 
   _renderBody() {
     const { status, summary, error } = this.state;

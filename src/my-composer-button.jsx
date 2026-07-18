@@ -1,4 +1,3 @@
-import { remote } from "electron";
 import { React, PropTypes } from "mailspring-exports";
 
 export default class MyComposerButton extends React.Component {
@@ -26,15 +25,10 @@ export default class MyComposerButton extends React.Component {
     // To retrieve information about the draft, we fetch the current editing
     // session from the draft store. We can access attributes of the draft
     // and add changes to the session which will be appear immediately.
+    // Note: the starter used electron's `remote.dialog` here, but `remote`
+    // was removed in modern Electron (Mailspring 1.22+), so we just apply
+    // the change directly.
     const newSubject = `${draft.subject} - It Worked!`;
-
-    remote.dialog.showMessageBox({
-      title: "Here we go...",
-      detail: `Adjusting the subject line To "${newSubject}"`,
-      buttons: ["OK"],
-      type: "info"
-    });
-
     session.changes.add({ subject: newSubject });
   };
 

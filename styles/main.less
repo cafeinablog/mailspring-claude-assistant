@@ -1,6 +1,58 @@
 @import "ui-variables";
 @import "ui-mixins";
 
+.claude-improve-draft {
+  position: relative;
+  display: inline-block;
+}
+
+// Nivel superior: el panel se monta vía portal en document.body,
+// no como hijo de .claude-improve-draft.
+.claude-improve-panel {
+    // Anclado a la ventana; left/bottom llegan por estilo inline desde el
+    // componente (la barra de acciones recorta a los hijos absolutos).
+    position: fixed;
+    z-index: 1000;
+    width: 420px;
+    max-width: 70vw;
+    background: @background-primary;
+    border: 1px solid @border-color-divider;
+    border-radius: 4px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    padding: @padding-small-vertical @padding-base-horizontal;
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: @padding-small-vertical;
+
+      .panel-title {
+        font-size: @font-size-small;
+        font-weight: 600;
+        color: @text-color-very-subtle;
+      }
+      .panel-close {
+        padding: 0 6px;
+      }
+    }
+
+    .panel-body {
+      font-size: @font-size-small;
+      line-height: 1.5;
+      color: @text-color;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 260px;
+      overflow-y: auto;
+
+      &.empty {
+        color: @text-color-very-subtle;
+        font-style: italic;
+      }
+    }
+}
+
 .claude-thread-summary {
   padding: @padding-base-vertical @padding-base-horizontal;
 

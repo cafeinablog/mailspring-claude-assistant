@@ -12,7 +12,9 @@ import { MessageStore, QuotedHTMLTransformer } from "mailspring-exports";
 // 1) quita las citas de mensajes anteriores (QuotedHTMLTransformer),
 // 2) convierte saltos de bloque en newlines,
 // 3) colapsa el exceso de líneas en blanco.
-function htmlToPlainText(html) {
+// Exportada: también la usa el botón del compositor (DEV-08) para leer
+// el texto plano del borrador.
+export function htmlToPlainText(html) {
   if (!html) {
     return "";
   }
@@ -25,7 +27,9 @@ function htmlToPlainText(html) {
     // Si el transformer falla con algún HTML raro, seguimos con el original.
   }
   const doc = new DOMParser().parseFromString(cleaned, "text/html");
-  doc.querySelectorAll("style, script, head, title").forEach(el => el.remove());
+  // <signature> es el wrapper con el que Mailspring marca la firma en los
+  // borradores (verificado en composer-signature/signature-utils del asar).
+  doc.querySelectorAll("style, script, head, title, signature").forEach(el => el.remove());
   // Newlines para elementos de bloque y <br>, para no perder la estructura.
   doc.querySelectorAll("br").forEach(el => el.replaceWith("\n"));
   doc

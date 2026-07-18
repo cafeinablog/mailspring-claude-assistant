@@ -14,18 +14,45 @@
 
 const API_URL = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
-const CONFIG_KEY_API_KEY = "mailspring-claude-assistant.apiKey";
 
-// Modelos por tarea (decisión S03). Serán configurables en DEV-11.
-export const MODELS = {
+// DEV-11: claves de la config local de Mailspring (config.json) que usa el
+// plugin. Todas editables desde Preferencias → Claude.
+export const CONFIG_KEYS = {
+  apiKey: "mailspring-claude-assistant.apiKey",
+  modelSummaryFast: "mailspring-claude-assistant.modelSummaryFast",
+  modelSummaryDetailed: "mailspring-claude-assistant.modelSummaryDetailed",
+  modelImprove: "mailspring-claude-assistant.modelImprove",
+  defaultInstruction: "mailspring-claude-assistant.defaultInstruction",
+};
+
+// Modelos por defecto por tarea (decisión S03). Configurables en DEV-11.
+export const MODEL_DEFAULTS = {
   summaryFast: "claude-haiku-4-5", // Resumen rápido
   summaryDetailed: "claude-sonnet-5", // Resumen detallado
   improveDraft: "claude-sonnet-5", // Mejorar respuesta (Fase 4)
 };
 
+const MODEL_CONFIG_KEY_BY_TASK = {
+  summaryFast: CONFIG_KEYS.modelSummaryFast,
+  summaryDetailed: CONFIG_KEYS.modelSummaryDetailed,
+  improveDraft: CONFIG_KEYS.modelImprove,
+};
+
+// Modelo vigente para una tarea: el configurado o el default.
+export function getModel(task) {
+  const value = AppEnv.config.get(MODEL_CONFIG_KEY_BY_TASK[task]);
+  return typeof value === "string" && value.trim() ? value.trim() : MODEL_DEFAULTS[task];
+}
+
 export function getApiKey() {
-  const key = AppEnv.config.get(CONFIG_KEY_API_KEY);
+  const key = AppEnv.config.get(CONFIG_KEYS.apiKey);
   return typeof key === "string" && key.trim() ? key.trim() : null;
+}
+
+// Instrucción por defecto para "Mejorar respuesta" (opcional, DEV-11).
+export function getDefaultInstruction() {
+  const value = AppEnv.config.get(CONFIG_KEYS.defaultInstruction);
+  return typeof value === "string" ? value.trim() : "";
 }
 
 function friendlyError(status, body) {
@@ -142,7 +169,7 @@ const IMPROVE_SYSTEM =
 // DEV-09: mejora del borrador según una instrucción libre del usuario.
 export function improveDraft(draftText, instruction) {
   return callClaude({
-    model: MODELS.improveDraft,
+    model: getModel("improveDraft"),
     system: IMPROVE_SYSTEM,
     userText: `Instrucción de mejora: ${instruction}\n\nBorrador:\n${draftText}`,
     maxTokens: 2048,
@@ -152,7 +179,7 @@ export function improveDraft(draftText, instruction) {
 // DEV-05: resumen del hilo. `detailed` elige modelo y estilo.
 export function summarizeThread(threadText, { detailed = false } = {}) {
   return callClaude({
-    model: detailed ? MODELS.summaryDetailed : MODELS.summaryFast,
+    model: detailed ? getModel("summaryDetailed") : getModel("summaryFast"),
     system: detailed ? SUMMARY_SYSTEM_DETAILED : SUMMARY_SYSTEM_FAST,
     userText: `Resume este hilo de correo:\n\n${threadText}`,
     maxTokens: detailed ? 2048 : 1024,

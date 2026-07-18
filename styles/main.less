@@ -97,6 +97,60 @@
     }
 }
 
+// DEV-11: pestaña "Claude" en Preferencias.
+.container-claude-preferences {
+  max-width: 620px;
+  padding: @padding-large-vertical @padding-large-horizontal;
+
+  section + section {
+    margin-top: @padding-large-vertical * 2;
+  }
+
+  h6 {
+    font-size: @font-size-small;
+    letter-spacing: 0.5px;
+    color: @text-color-very-subtle;
+    margin: 0 0 @padding-small-vertical 0;
+  }
+
+  .pref-row {
+    display: flex;
+    align-items: center;
+    gap: @padding-small-horizontal;
+    margin-bottom: @padding-small-vertical;
+
+    label {
+      flex: 0 0 160px;
+      margin: 0;
+      font-size: @font-size-small;
+      color: @text-color;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .show-key {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: @font-size-small;
+      color: @text-color-very-subtle;
+    }
+  }
+
+  .pref-note {
+    font-size: @font-size-small;
+    color: @text-color-very-subtle;
+    margin: 0 0 @padding-small-vertical 0;
+    padding-left: 160px + @padding-small-horizontal;
+  }
+}
+
 .claude-thread-summary {
   padding: @padding-base-vertical @padding-base-horizontal;
 

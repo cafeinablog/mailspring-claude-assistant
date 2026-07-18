@@ -1,7 +1,9 @@
-import { ComponentRegistry } from 'mailspring-exports';
+import { ComponentRegistry, PreferencesUIStore } from 'mailspring-exports';
 
 import ImproveDraftButton from './improve-draft-button';
 import ThreadSummarySidebar from './thread-summary-sidebar';
+
+let preferencesTab = null;
 
 // Activate is called when the package is loaded. If your package previously
 // saved state using `serialize` it is provided.
@@ -15,6 +17,13 @@ export function activate() {
   ComponentRegistry.register(ThreadSummarySidebar, {
     role: 'MessageListSidebar:ContactCard',
   });
+  // DEV-11: pestaña "Claude" en Preferencias (patrón composer-templates).
+  preferencesTab = new PreferencesUIStore.TabItem({
+    tabId: 'Claude',
+    displayName: 'Claude',
+    componentClassFn: () => require('./preferences-claude').default,
+  });
+  PreferencesUIStore.registerPreferencesTab(preferencesTab);
 }
 
 // Serialize is called when your package is about to be unmounted.
@@ -31,4 +40,8 @@ export function serialize() {}
 export function deactivate() {
   ComponentRegistry.unregister(ImproveDraftButton);
   ComponentRegistry.unregister(ThreadSummarySidebar);
+  if (preferencesTab) {
+    PreferencesUIStore.unregisterPreferencesTab(preferencesTab.tabId);
+    preferencesTab = null;
+  }
 }

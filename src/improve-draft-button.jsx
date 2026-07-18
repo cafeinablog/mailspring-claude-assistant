@@ -1,6 +1,6 @@
 import { React, ReactDOM, PropTypes } from "mailspring-exports";
 import { htmlToPlainText, plainTextToDraftHtml } from "./thread-text";
-import { improveDraft } from "./claude-client";
+import { improveDraft, getDefaultInstruction } from "./claude-client";
 
 /*
  * Botón "Mejorar con Claude" en la barra de acciones del compositor.
@@ -69,6 +69,12 @@ export default class ImproveDraftButton extends React.Component {
       improved: null,
       error: null,
       panelPos,
+      // DEV-11: si hay instrucción por defecto en settings, se trae pre-escrita
+      // (solo si el campo está vacío; si el usuario ya escribió algo en esta
+      // ventana, se respeta lo suyo).
+      instruction: this.state.instruction.trim()
+        ? this.state.instruction
+        : getDefaultInstruction(),
     });
   };
 

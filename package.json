@@ -1,0 +1,25 @@
+{
+  "name": "mailspring-claude-assistant",
+  "main": "./lib/main",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chowkaideng/mailspring-claude-assistant.git"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "engines": {
+    "mailspring": ">=1.6.3"
+  },
+  "windowTypes": {
+    "default": true,
+    "composer": true
+  },
+  "description": "Plugin personal de Mailspring que integra la API de Claude: resumir hilo y mejorar respuesta (texto plano, con vista previa).",
+  "devDependencies": {
+    "@types/react": "^16.7.22",
+    "typescript": "^3.6.3"
+  },
+  "license": "MIT"
+}

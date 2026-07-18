@@ -1,0 +1,12 @@
+# Dependencias (solo para compilar; runtime lo provee Mailspring)
+node_modules/
+
+# Archivo de estado local del proyecto — NO subir al repo
+Mailspring_Claude_Plugin_-_Estado.md
+
+# Ajustes locales de Claude Code (permisos por máquina)
+.claude/settings.local.json
+
+# Sistema / editores
+.DS_Store
+.idea/

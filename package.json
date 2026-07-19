@@ -2,9 +2,14 @@
   "name": "mailspring-claude-assistant",
   "main": "./lib/main",
   "version": "0.1.0",
+  "author": "cafeinablog",
+  "homepage": "https://github.com/cafeinablog/mailspring-claude-assistant#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chowkaideng/mailspring-claude-assistant.git"
+    "url": "https://github.com/cafeinablog/mailspring-claude-assistant.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cafeinablog/mailspring-claude-assistant/issues"
   },
   "scripts": {
     "build": "tsc"

@@ -92,8 +92,25 @@ iconos SVG del plugin van como **data-URI base64** (Chromium no acepta SVG como 
 - **Carpeta de packages de Mailspring:** `C:\Users\chowk\AppData\Roaming\Mailspring\packages`.
   El plugin se instala ahí (junction/symlink al repo para desarrollo iterativo).
 - **DevTools:** Ctrl+Shift+I · **Recargar plugins/ventana:** Ctrl+Shift+R.
-- **Repo GitHub:** `chowkaideng/mailspring-claude-assistant` (privado). Auth ya configurada vía Git
-  Credential Manager.
+- **Repo GitHub principal (público, distribución):** `cafeinablog/mailspring-claude-assistant` —
+  remote `origin`. El repo viejo `chowkaideng/mailspring-claude-assistant` (privado) sigue como
+  remote `privado`, solo de respaldo. Credenciales por-repo (`credential.useHttpPath true`) para
+  que ambas cuentas convivan; identidad de commits repo-local: `cafeinablog`
+  (`306714372+cafeinablog@users.noreply.github.com`).
+
+## Distribución pública (desde S05)
+
+- El plugin ya no es solo personal: se distribuye desde `cafeinablog/mailspring-claude-assistant`
+  (público, MIT, topics configurados, Issues activo, ruleset `proteger-main` bloquea force-push y
+  borrado de `main`).
+- **Flujo de ramas:** se trabaja en `develop`; al liberar, merge a `main` + tag `vX.Y.Z` + Release
+  en GitHub con zip adjunto. `main` es lo estable/publicado.
+- **Zip de release:** carpeta `mailspring-claude-assistant/` con SOLO runtime: `package.json`,
+  `lib/`, `styles/`, `assets/`, `LICENSE`, `README.md`, `CHANGELOG.md` (sin `src/`, `CLAUDE.md`,
+  configs de dev). Los usuarios lo descomprimen en la carpeta `packages` de Mailspring.
+- Al liberar: actualizar `CHANGELOG.md` y subir `version` en `package.json` (semver).
+- ⚠️ El repo es público: cuidar aún más que nunca se cuele la API key ni datos personales en
+  commits, y mantener el README de cara a usuarios finales.
 
 ## Reglas operativas de sesión
 

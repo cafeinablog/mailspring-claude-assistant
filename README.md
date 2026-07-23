@@ -1,18 +1,57 @@
 # Mailspring Claude Assistant
 
 Un plugin no oficial para [Mailspring](https://getmailspring.com/) que integra la IA de Claude
-(Anthropic) directamente en tu cliente de correo, con dos funciones:
+(Anthropic) directamente en tu cliente de correo: **resume hilos** completos y **mejora tus
+respuestas** antes de enviarlas, sin salir del compositor. Todo el procesamiento es en **texto
+plano** — el plugin nunca modifica el HTML de tus correos.
 
-- **Resumir hilo** — un recuadro que resume toda la conversación (con sus pendientes) y aparece
-  tanto en la cabecera del hilo como dentro del compositor mientras redactas.
-- **Mejorar respuesta** — escribe tu borrador, dale una instrucción libre ("hazlo más formal",
-  "acórtalo", "tradúcelo al inglés") y Claude propone una versión mejorada que puedes **Aplicar**
-  o **Descartar**. Tu firma y la cita del mensaje original se conservan intactas.
-
-Todo el procesamiento es en **texto plano**: el plugin nunca modifica el HTML de tus correos.
+<p align="center">
+  <img src="docs/screenshots/demo.gif" width="850" alt="Demostración del plugin: resumen de hilo y mejora de respuesta en acción">
+</p>
 
 > ⚠️ Este es un proyecto personal y no oficial, sin relación con Mailspring ni con Anthropic.
 > Usa la API de Anthropic con **tu propia** clave (pago por uso).
+
+---
+
+## Funciones
+
+### ✳ Resumir hilo
+
+Un recuadro que resume toda la conversación (con sus pendientes) y aparece tanto en la cabecera del
+hilo como dentro del compositor mientras redactas. Pulsa **Generar resumen** y el resultado se
+guarda por hilo: al volver aparece al instante, y si llegan mensajes nuevos te avisa para
+regenerarlo. Puedes colapsarlo cuando no lo necesites.
+
+<p align="center">
+  <img src="docs/screenshots/resumen-hilo.png" width="850" alt="Resumen del hilo generado, con controles para regenerar, ocultar y la meta del resumen">
+</p>
+
+<p align="center"><em>El resumen vive en la cabecera del hilo (y también en el compositor), compartiendo el mismo resultado.</em></p>
+
+### ✳ Mejorar respuesta
+
+Escribe tu borrador como salga, dale una instrucción libre ("hazlo más formal", "acórtalo",
+"tradúcelo al inglés") y Claude propone una versión mejorada. La revisas en una vista previa y
+eliges **Aplicar** o **Descartar** — tu firma y la cita del mensaje original se conservan intactas.
+
+<p align="center">
+  <img src="docs/screenshots/mejorar-respuesta.png" width="850" alt="Panel de mejora abierto con el borrador cargado y el campo de instrucción">
+</p>
+
+<p align="center"><em>1. Escribes tu borrador · 2. Abres el panel de mejora · 3. Le dices en tus palabras qué cambiar.</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/mejorar-respuesta-preview.png" width="850" alt="Vista previa del texto mejorado con los botones Descartar y Aplicar">
+</p>
+
+<p align="center"><em>Claude te muestra el resultado antes de tocar nada: Aplicar lo inserta, Descartar deja tu borrador intacto.</em></p>
+
+<p align="center">
+  <img src="docs/screenshots/mejorar-respuesta-aplicado.png" width="850" alt="El texto mejorado ya insertado en el cuerpo del correo, con la firma conservada">
+</p>
+
+<p align="center"><em>El texto mejorado queda en el cuerpo, listo para enviar; tu firma y la cita del hilo se conservan.</em></p>
 
 ---
 
@@ -39,16 +78,6 @@ No necesitas programar ni compilar nada: el plugin ya viene compilado.
 4. **Reinicia Mailspring.**
 5. Abre **Preferencias → Claude** y pega tu API key. ¡Listo!
 
-## Uso
-
-- **Resumir un hilo:** abre cualquier conversación. En el recuadro "Resumen del hilo" (arriba del
-  hilo, o dentro del compositor al responder) pulsa **Generar resumen**. El resultado se guarda,
-  así que al volver al hilo aparece al instante; si llegan mensajes nuevos, te avisa para
-  regenerarlo.
-- **Mejorar una respuesta:** al redactar, pulsa el icono de Claude en la barra del compositor,
-  escribe una instrucción y pulsa **Mejorar**. Revisa la propuesta y elige **Aplicar** o
-  **Descartar**.
-
 ## Configuración
 
 Todo se ajusta en **Preferencias → Claude**:
@@ -57,6 +86,8 @@ Todo se ajusta en **Preferencias → Claude**:
 - **Modelos** — qué modelo usar para resumir y para mejorar. Para resúmenes más detallados, elige
   un modelo de mayor calidad; para ahorrar, uno más económico.
 - **Instrucción por defecto** (opcional) — texto que aparece ya escrito en el panel de mejora.
+
+<!-- TODO: agregar <img src="docs/screenshots/preferencias.png" width="850"> cuando esté disponible la captura -->
 
 ## Privacidad y seguridad
 
@@ -100,6 +131,14 @@ New-Item -ItemType Junction `
 Las incidencias y sugerencias son bienvenidas en
 [Issues](https://github.com/cafeinablog/mailspring-claude-assistant/issues). Si envías un Pull
 Request, hazlo contra la rama `develop`.
+
+## Supervisión del proyecto
+
+<p align="center">
+  <img src="docs/screenshots/pinina-mailspring-claude-assistant.jpg" width="600" alt="Pinina, la gata del proyecto, sentada en su torre junto al monitor de desarrollo">
+</p>
+
+<p align="center"><em>Pinina supervisando el desarrollo. Todo el código fue revisado desde su torre. 🐱</em></p>
 
 ## Licencia
 

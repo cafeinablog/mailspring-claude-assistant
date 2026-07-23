@@ -87,7 +87,11 @@ Todo se ajusta en **Preferencias → Claude**:
   un modelo de mayor calidad; para ahorrar, uno más económico.
 - **Instrucción por defecto** (opcional) — texto que aparece ya escrito en el panel de mejora.
 
-<!-- TODO: agregar <img src="docs/screenshots/preferencias.png" width="850"> cuando esté disponible la captura -->
+<p align="center">
+  <img src="docs/screenshots/preferencias.png" width="850" alt="Pestaña Claude en Preferencias, con la API key enmascarada, los modelos por tarea y la instrucción por defecto">
+</p>
+
+<p align="center"><em>La pestaña Claude en Preferencias: tu API key (enmascarada), el modelo para cada función y la instrucción por defecto.</em></p>
 
 ## Privacidad y seguridad
 

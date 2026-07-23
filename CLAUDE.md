@@ -81,8 +81,6 @@ iconos SVG del plugin van como **data-URI base64** (Chromium no acepta SVG como 
   no resume). Ajustar el placeholder/ejemplo a algo coherente (p. ej. "hazlo más formal").
 - **DOC-01** (opcional) · Recortar el `demo.gif`: los frames 13-48 (~4.25 s de scroll por el hilo)
   no aportan; bajaría la duración de 26 a 22 s. Reemplazar `docs/screenshots/demo.gif`.
-- **PUB-01b** (pendiente parcial) · Falta la captura `preferencias.png` (pestaña Claude con la API
-  key enmascarada) para la sección Configuración del README; hay un `<!-- TODO -->` marcado ahí.
 
 ## Estructura y build
 

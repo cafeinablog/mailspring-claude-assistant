@@ -66,12 +66,23 @@ Pulido de UI de S04 (icono de pestaña, botón-icono del compositor, popover nat
 en UI-01/02/03; nota técnica: el protocolo `mailspring://` sirve sin Content-Type, así que los
 iconos SVG del plugin van como **data-URI base64** (Chromium no acepta SVG como imagen sin MIME).
 
-## Pendiente de pulido (para S05)
+## Tareas pendientes (registradas, no trabajadas aún)
 
 - **UI-04** · Espaciado interno de la caja de resumen: los botones "Regenerar" y "Ocultar" (y el
   contenido en general) se ven pegados al borde de la caja. Dar más aire — comparar con el botón
   "Responder" de los mensajes, que respira más. Revisar el padding de `.cs-head` (arriba/derecha)
   en `styles/main.less` y/o margen de los botones. Solo estético; la funcionalidad está lista.
+- **BUG-01** · "Mejorar respuesta" no le dice a Claude quién es el remitente, así que puede fallar
+  la concordancia de género: generó "Quedo atenta" firmando Daniel (hombre). Visible en 2 capturas
+  del README. Arreglo: pasar el remitente/identidad en el prompt de `improveDraft` (leer `De:` del
+  borrador o la firma) para que respete género y persona.
+- **UX-01** · La instrucción por defecto de ejemplo/guardada en Preferencias dice algo tipo
+  "Resumir el texto", que confunde bajo el encabezado "Mejorar respuesta" (esa función reescribe,
+  no resume). Ajustar el placeholder/ejemplo a algo coherente (p. ej. "hazlo más formal").
+- **DOC-01** (opcional) · Recortar el `demo.gif`: los frames 13-48 (~4.25 s de scroll por el hilo)
+  no aportan; bajaría la duración de 26 a 22 s. Reemplazar `docs/screenshots/demo.gif`.
+- **PUB-01b** (pendiente parcial) · Falta la captura `preferencias.png` (pestaña Claude con la API
+  key enmascarada) para la sección Configuración del README; hay un `<!-- TODO -->` marcado ahí.
 
 ## Estructura y build
 

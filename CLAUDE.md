@@ -95,6 +95,68 @@ remitente, concordancia de género en adjetivos/participios (también en el salu
 - **DOC-01** (opcional) · Recortar el `demo.gif`: los frames 13-48 (~4.25 s de scroll por el hilo)
   no aportan; bajaría la duración de 26 a 22 s. Reemplazar `docs/screenshots/demo.gif`.
 
+### Fase 14 — Internacionalización (definida S08; ver hallazgo técnico abajo)
+
+- **I18N-01** · Módulo `i18n.js`: diccionario propio del plugin + `getCurrentLocale()`, con
+  fallback a `localized()` de Mailspring para los términos genéricos.
+- **I18N-02** · Invertir el idioma base: strings de UI a inglés, español al diccionario (~15).
+- **I18N-03** · Mensajes de error de `claude-client.js` (~10) al mismo esquema.
+- **I18N-04** · Prompts de sistema a inglés por neutralidad (la salida ya sigue el idioma del correo).
+- **I18N-05** · Verificar cambiando el idioma en Preferencias → General.
+
+### Fase 15 — Documentación bilingüe
+
+- **DOC-04** · `README.md` a inglés (canónico, el que renderiza la portada) + `README.es.md`, con
+  selector de idioma arriba. GitHub no tiene i18n nativo de README; ésta es la convención de facto.
+- **DOC-05** · Regenerar las 5 capturas anotadas en inglés — la leyenda va **incrustada en el
+  pixel**, así que hace falta un set duplicado. Absorbe DOC-02. Es la ruta crítica de la difusión.
+- **DOC-06** · `CHANGELOG.md` a inglés y solo inglés de aquí en adelante (es técnico; mantenerlo
+  bilingüe se abandona a la segunda release).
+
+### Fase 16 — Difusión (reemplaza PUB-04)
+
+- **PUB-04a** · Leer las convenciones de los topics existentes de la categoría Plugins.
+- **PUB-04b** · Redactar el post en inglés: qué hace, capturas/GIF, instalación, y aviso explícito
+  de que requiere API key propia de Anthropic (de pago).
+- **PUB-04c** · Publicar y atender respuestas (Issues ya está activo).
+
+> **Orden obligatorio: I18N → DOC → PUB.** Publicar antes de tener el inglés listo sería quemar la
+> única presentación disponible. Expectativa realista: con ~17 topics en toda la categoría, el
+> tráfico será modesto; se hace por tenerlo publicado y bien hecho, no por volumen.
+
+## Internacionalización — hallazgo técnico (investigado S08, sin implementar)
+
+Mailspring **sí** tiene i18n: `lang/*.json` con decenas de idiomas y `localized()`,
+`getCurrentLocale()`, `isRTL` exportados en `mailspring-exports` (disponibles para plugins).
+
+⚠️ **Pero un plugin NO puede registrar sus propias traducciones.** En `intl.js` (asar 1.23, líneas
+190-198) `localizations` se carga una sola vez desde `static/lang/` de la app; `localized(texto)`
+busca ahí y, si no encuentra la clave, **devuelve el texto tal cual**. No hay hook para packages.
+
+Cobertura medida contra `es.json` (884 claves): aciertan los genéricos (Hide, Show, Cancel,
+Preferences, Error, Default); NO están Summary, Generate, Regenerate, Improve, Apply, Discard,
+Model, API Key, Loading, Optional.
+
+**Arquitectura correcta:** escribir el plugin en **inglés como idioma base** + diccionario propio
+del plugin elegido con `getCurrentLocale()`, usando `localized()` encima para que los genéricos
+salgan gratis en todos los idiomas de Mailspring.
+
+**Volumen real:** ~15 strings de UI (4 compositor, 8 Preferencias, 3 panel) + ~10 mensajes de error
+en `claude-client.js`. Es poco.
+
+**Los prompts ya son agnósticos de idioma:** `SUMMARY_SYSTEM` pide responder "en el idioma
+predominante del hilo" e `IMPROVE_SYSTEM` "conserva el idioma del borrador" — la salida de Claude
+ya se adapta sola. Solo la cáscara está en español. (Aun así conviene pasar los prompts a inglés
+por neutralidad: un system prompt en español sesga sutilmente aunque instruya lo contrario.)
+
+## Publicación en la comunidad — hallazgo (investigado S08)
+
+**No existe galería ni registro oficial de plugins.** El "listado" es una categoría de foro
+(`community.getmailspring.com/c/plugins/8`) con ~17 topics; sin proceso de envío, sin aprobación,
+sin vetting. El "plugin gallery" prometido (Foundry376/Mailspring#363) nunca se materializó.
+Publicar = abrir un topic. **El foro es 100% en inglés**, así que difundir depende de tener antes
+la internacionalización y el README en inglés.
+
 ## Estructura y build
 
 - `src/` — código fuente TypeScript/JSX. **Se edita aquí.**

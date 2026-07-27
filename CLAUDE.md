@@ -1,7 +1,10 @@
 # CLAUDE.md — Mailspring Claude Assistant
 
-Contexto permanente para sesiones de Claude Code. Léelo al inicio de cada sesión junto con
-`Mailspring_Claude_Plugin_-_Estado.md` (archivo local, ignorado por git) para saber en qué vamos.
+Contexto permanente para sesiones de Claude Code. Léelo al inicio de cada sesión.
+
+**El archivo de estado NO vive en el repo.** Daniel lo mantiene fuera (unidad compartida) y lo
+pasa al inicio de cada sesión con "lee mi estado md". No crear ni versionar copias aquí: una copia
+en el repo se queda vieja y contradice al maestro.
 
 ## ⚠️ Regla crítica de seguridad
 
@@ -66,16 +69,21 @@ Pulido de UI de S04 (icono de pestaña, botón-icono del compositor, popover nat
 en UI-01/02/03; nota técnica: el protocolo `mailspring://` sirve sin Content-Type, así que los
 iconos SVG del plugin van como **data-URI base64** (Chromium no acepta SVG como imagen sin MIME).
 
+## Identidad en "Mejorar respuesta" (BUG-01, resuelto S08)
+
+`improveDraft(draftText, instruction, identity)` recibe `{ from, to }` construidos por
+`draftIdentity()` en `improve-draft-button.jsx` a partir de `draft.from[0]` y `draft.to` (con el
+`contactLabel` exportado de `thread-text.js`). Se lee del **borrador, no de la firma**: el `De:`
+está siempre, la firma puede no estar configurada. El system prompt exige primera persona como el
+remitente, concordancia de género en adjetivos/participios (también en el saludo al destinatario),
+**fórmulas neutras cuando el nombre no permite deducir el género** y no tocar la firma.
+
 ## Tareas pendientes (registradas, no trabajadas aún)
 
 - **UI-04** · Espaciado interno de la caja de resumen: los botones "Regenerar" y "Ocultar" (y el
   contenido en general) se ven pegados al borde de la caja. Dar más aire — comparar con el botón
   "Responder" de los mensajes, que respira más. Revisar el padding de `.cs-head` (arriba/derecha)
   en `styles/main.less` y/o margen de los botones. Solo estético; la funcionalidad está lista.
-- **BUG-01** · "Mejorar respuesta" no le dice a Claude quién es el remitente, así que puede fallar
-  la concordancia de género: generó "Quedo atenta" firmando Daniel (hombre). Visible en 2 capturas
-  del README. Arreglo: pasar el remitente/identidad en el prompt de `improveDraft` (leer `De:` del
-  borrador o la firma) para que respete género y persona.
 - **UX-01** · La instrucción por defecto de ejemplo/guardada en Preferencias dice algo tipo
   "Resumir el texto", que confunde bajo el encabezado "Mejorar respuesta" (esa función reescribe,
   no resume). Ajustar el placeholder/ejemplo a algo coherente (p. ej. "hazlo más formal").

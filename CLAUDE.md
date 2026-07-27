@@ -80,13 +80,18 @@ remitente, concordancia de género en adjetivos/participios (también en el salu
 
 ## Tareas pendientes (registradas, no trabajadas aún)
 
-- **UI-04** · Espaciado interno de la caja de resumen: los botones "Regenerar" y "Ocultar" (y el
-  contenido en general) se ven pegados al borde de la caja. Dar más aire — comparar con el botón
-  "Responder" de los mensajes, que respira más. Revisar el padding de `.cs-head` (arriba/derecha)
-  en `styles/main.less` y/o margen de los botones. Solo estético; la funcionalidad está lista.
-- **UX-01** · La instrucción por defecto de ejemplo/guardada en Preferencias dice algo tipo
-  "Resumir el texto", que confunde bajo el encabezado "Mejorar respuesta" (esa función reescribe,
-  no resume). Ajustar el placeholder/ejemplo a algo coherente (p. ej. "hazlo más formal").
+- **UI-04b** · UI-04 se aplicó en S08 (12px arriba/abajo, 8px entre bloques) y Daniel lo dio por
+  "suficientemente bien, pero no perfecto". Queda margen de ajuste fino: las variables son
+  `@cs-pad-box` y `@cs-pad-gap` en `styles/main.less`. Sin urgencia; requiere que Daniel diga qué
+  le sigue chirriando.
+
+- **UX-01** (reclasificada S08: es DOC, no bug de código) · El placeholder del código está bien
+  (`opcional, ej. "corrige ortografía y hazlo más claro"`). Lo que confunde es que la captura
+  publicada `docs/screenshots/preferencias.png` muestra un **valor guardado** de la config local de
+  Daniel — "Resumir el texto" — bajo el encabezado MEJORAR RESPUESTA. No hay nada que tocar en
+  `preferences-claude.jsx`. Arreglo: vaciar el campo (para que se vea el placeholder real y quede
+  claro que es opcional), recapturar y regenerar las anotaciones. Tarea de la sesión de planeación,
+  donde vive el script de anotación.
 - **DOC-01** (opcional) · Recortar el `demo.gif`: los frames 13-48 (~4.25 s de scroll por el hilo)
   no aportan; bajaría la duración de 26 a 22 s. Reemplazar `docs/screenshots/demo.gif`.
 
@@ -104,8 +109,10 @@ remitente, concordancia de género en adjetivos/participios (también en el salu
 
 - **SO:** Windows 11 (PowerShell). Usuario: `chowk`. Bash (Git Bash) también disponible.
 - **Node.js** v24.15.0 · **npm** 11.12.1 · **Git** 2.55.
-- **Mailspring** 1.22.0, interfaz en **español**. Menú "Desarrollador" → "Ejecutar en modo
-  depuración". También existe "Instalar un complemento..." para instalar desde carpeta.
+- **Mailspring** 1.23.0 (actualizado; hasta S07 era 1.22.0), interfaz en **español**. Menú
+  "Desarrollador" → "Ejecutar en modo depuración". También existe "Instalar un complemento..."
+  para instalar desde carpeta. Al verificar APIs contra el asar, usar la carpeta de la versión
+  vigente: `%LOCALAPPDATA%\Mailspring\app-1.23.0\resources\app.asar`.
 - **Carpeta de packages de Mailspring:** `C:\Users\chowk\AppData\Roaming\Mailspring\packages`.
   El plugin se instala ahí (junction/symlink al repo para desarrollo iterativo).
 - **DevTools:** Ctrl+Shift+I · **Recargar plugins/ventana:** Ctrl+Shift+R.

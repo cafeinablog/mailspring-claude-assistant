@@ -155,14 +155,33 @@ const IMPROVE_SYSTEM =
   "explicaciones, sin asunto y sin comentarios antes o después. Conserva el idioma del " +
   "borrador salvo que la instrucción pida cambiarlo, y no inventes información que no esté " +
   "en el borrador. Escribe en texto plano, sin formato Markdown (nada de asteriscos ni " +
-  "almohadillas).";
+  "almohadillas). " +
+  // BUG-01: sin esto el modelo elegía el género al azar y firmaba "Quedo atenta"
+  // en un correo de un hombre.
+  "Cuando se indique el remitente, escribe siempre en primera persona como esa persona y " +
+  "concuerda en género los adjetivos y participios que se refieran a ella (por ejemplo " +
+  "'quedo atento' si es hombre y 'quedo atenta' si es mujer); aplica el mismo criterio a los " +
+  "destinatarios en el saludo y la despedida. Si un nombre no permite deducir el género con " +
+  "certeza, usa fórmulas neutras ('quedo pendiente', 'un saludo') en vez de adivinar. Nunca " +
+  "cambies la firma ni el nombre del remitente.";
 
 // DEV-09: mejora del borrador según una instrucción libre del usuario.
-export function improveDraft(draftText, instruction) {
+// BUG-01: `identity` ({ from, to }) le dice a Claude quién firma y a quién le
+// escribe, para que la concordancia de género no salga al azar. Es opcional:
+// si el borrador no trae remitente, el prompt simplemente omite esas líneas.
+export function improveDraft(draftText, instruction, identity = {}) {
+  const context = [];
+  if (identity.from) {
+    context.push(`Remitente (quien escribe y firma este correo): ${identity.from}`);
+  }
+  if (identity.to) {
+    context.push(`Destinatario(s): ${identity.to}`);
+  }
+  const header = context.length ? `${context.join("\n")}\n\n` : "";
   return callClaude({
     model: getModel("improveDraft"),
     system: IMPROVE_SYSTEM,
-    userText: `Instrucción de mejora: ${instruction}\n\nBorrador:\n${draftText}`,
+    userText: `${header}Instrucción de mejora: ${instruction}\n\nBorrador:\n${draftText}`,
     maxTokens: 2048,
   });
 }

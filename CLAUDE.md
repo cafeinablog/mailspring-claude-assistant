@@ -1,7 +1,10 @@
 # CLAUDE.md — Mailspring Claude Assistant
 
-Contexto permanente para sesiones de Claude Code. Léelo al inicio de cada sesión junto con
-`Mailspring_Claude_Plugin_-_Estado.md` (archivo local, ignorado por git) para saber en qué vamos.
+Contexto permanente para sesiones de Claude Code. Léelo al inicio de cada sesión.
+
+**El archivo de estado NO vive en el repo.** Daniel lo mantiene fuera (unidad compartida) y lo
+pasa al inicio de cada sesión con "lee mi estado md". No crear ni versionar copias aquí: una copia
+en el repo se queda vieja y contradice al maestro.
 
 ## ⚠️ Regla crítica de seguridad
 
@@ -66,21 +69,93 @@ Pulido de UI de S04 (icono de pestaña, botón-icono del compositor, popover nat
 en UI-01/02/03; nota técnica: el protocolo `mailspring://` sirve sin Content-Type, así que los
 iconos SVG del plugin van como **data-URI base64** (Chromium no acepta SVG como imagen sin MIME).
 
+## Identidad en "Mejorar respuesta" (BUG-01, resuelto S08)
+
+`improveDraft(draftText, instruction, identity)` recibe `{ from, to }` construidos por
+`draftIdentity()` en `improve-draft-button.jsx` a partir de `draft.from[0]` y `draft.to` (con el
+`contactLabel` exportado de `thread-text.js`). Se lee del **borrador, no de la firma**: el `De:`
+está siempre, la firma puede no estar configurada. El system prompt exige primera persona como el
+remitente, concordancia de género en adjetivos/participios (también en el saludo al destinatario),
+**fórmulas neutras cuando el nombre no permite deducir el género** y no tocar la firma.
+
 ## Tareas pendientes (registradas, no trabajadas aún)
 
-- **UI-04** · Espaciado interno de la caja de resumen: los botones "Regenerar" y "Ocultar" (y el
-  contenido en general) se ven pegados al borde de la caja. Dar más aire — comparar con el botón
-  "Responder" de los mensajes, que respira más. Revisar el padding de `.cs-head` (arriba/derecha)
-  en `styles/main.less` y/o margen de los botones. Solo estético; la funcionalidad está lista.
-- **BUG-01** · "Mejorar respuesta" no le dice a Claude quién es el remitente, así que puede fallar
-  la concordancia de género: generó "Quedo atenta" firmando Daniel (hombre). Visible en 2 capturas
-  del README. Arreglo: pasar el remitente/identidad en el prompt de `improveDraft` (leer `De:` del
-  borrador o la firma) para que respete género y persona.
-- **UX-01** · La instrucción por defecto de ejemplo/guardada en Preferencias dice algo tipo
-  "Resumir el texto", que confunde bajo el encabezado "Mejorar respuesta" (esa función reescribe,
-  no resume). Ajustar el placeholder/ejemplo a algo coherente (p. ej. "hazlo más formal").
+- **UI-04b** · UI-04 se aplicó en S08 (12px arriba/abajo, 8px entre bloques) y Daniel lo dio por
+  "suficientemente bien, pero no perfecto". Queda margen de ajuste fino: las variables son
+  `@cs-pad-box` y `@cs-pad-gap` en `styles/main.less`. Sin urgencia; requiere que Daniel diga qué
+  le sigue chirriando.
+
+- **UX-01** (reclasificada S08: es DOC, no bug de código) · El placeholder del código está bien
+  (`opcional, ej. "corrige ortografía y hazlo más claro"`). Lo que confunde es que la captura
+  publicada `docs/screenshots/preferencias.png` muestra un **valor guardado** de la config local de
+  Daniel — "Resumir el texto" — bajo el encabezado MEJORAR RESPUESTA. No hay nada que tocar en
+  `preferences-claude.jsx`. Arreglo: vaciar el campo (para que se vea el placeholder real y quede
+  claro que es opcional), recapturar y regenerar las anotaciones. Tarea de la sesión de planeación,
+  donde vive el script de anotación.
 - **DOC-01** (opcional) · Recortar el `demo.gif`: los frames 13-48 (~4.25 s de scroll por el hilo)
   no aportan; bajaría la duración de 26 a 22 s. Reemplazar `docs/screenshots/demo.gif`.
+
+### Fase 14 — Internacionalización (definida S08; ver hallazgo técnico abajo)
+
+- **I18N-01** · Módulo `i18n.js`: diccionario propio del plugin + `getCurrentLocale()`, con
+  fallback a `localized()` de Mailspring para los términos genéricos.
+- **I18N-02** · Invertir el idioma base: strings de UI a inglés, español al diccionario (~15).
+- **I18N-03** · Mensajes de error de `claude-client.js` (~10) al mismo esquema.
+- **I18N-04** · Prompts de sistema a inglés por neutralidad (la salida ya sigue el idioma del correo).
+- **I18N-05** · Verificar cambiando el idioma en Preferencias → General.
+
+### Fase 15 — Documentación bilingüe
+
+- **DOC-04** · `README.md` a inglés (canónico, el que renderiza la portada) + `README.es.md`, con
+  selector de idioma arriba. GitHub no tiene i18n nativo de README; ésta es la convención de facto.
+- **DOC-05** · Regenerar las 5 capturas anotadas en inglés — la leyenda va **incrustada en el
+  pixel**, así que hace falta un set duplicado. Absorbe DOC-02. Es la ruta crítica de la difusión.
+- **DOC-06** · `CHANGELOG.md` a inglés y solo inglés de aquí en adelante (es técnico; mantenerlo
+  bilingüe se abandona a la segunda release).
+
+### Fase 16 — Difusión (reemplaza PUB-04)
+
+- **PUB-04a** · Leer las convenciones de los topics existentes de la categoría Plugins.
+- **PUB-04b** · Redactar el post en inglés: qué hace, capturas/GIF, instalación, y aviso explícito
+  de que requiere API key propia de Anthropic (de pago).
+- **PUB-04c** · Publicar y atender respuestas (Issues ya está activo).
+
+> **Orden obligatorio: I18N → DOC → PUB.** Publicar antes de tener el inglés listo sería quemar la
+> única presentación disponible. Expectativa realista: con ~17 topics en toda la categoría, el
+> tráfico será modesto; se hace por tenerlo publicado y bien hecho, no por volumen.
+
+## Internacionalización — hallazgo técnico (investigado S08, sin implementar)
+
+Mailspring **sí** tiene i18n: `lang/*.json` con decenas de idiomas y `localized()`,
+`getCurrentLocale()`, `isRTL` exportados en `mailspring-exports` (disponibles para plugins).
+
+⚠️ **Pero un plugin NO puede registrar sus propias traducciones.** En `intl.js` (asar 1.23, líneas
+190-198) `localizations` se carga una sola vez desde `static/lang/` de la app; `localized(texto)`
+busca ahí y, si no encuentra la clave, **devuelve el texto tal cual**. No hay hook para packages.
+
+Cobertura medida contra `es.json` (884 claves): aciertan los genéricos (Hide, Show, Cancel,
+Preferences, Error, Default); NO están Summary, Generate, Regenerate, Improve, Apply, Discard,
+Model, API Key, Loading, Optional.
+
+**Arquitectura correcta:** escribir el plugin en **inglés como idioma base** + diccionario propio
+del plugin elegido con `getCurrentLocale()`, usando `localized()` encima para que los genéricos
+salgan gratis en todos los idiomas de Mailspring.
+
+**Volumen real:** ~15 strings de UI (4 compositor, 8 Preferencias, 3 panel) + ~10 mensajes de error
+en `claude-client.js`. Es poco.
+
+**Los prompts ya son agnósticos de idioma:** `SUMMARY_SYSTEM` pide responder "en el idioma
+predominante del hilo" e `IMPROVE_SYSTEM` "conserva el idioma del borrador" — la salida de Claude
+ya se adapta sola. Solo la cáscara está en español. (Aun así conviene pasar los prompts a inglés
+por neutralidad: un system prompt en español sesga sutilmente aunque instruya lo contrario.)
+
+## Publicación en la comunidad — hallazgo (investigado S08)
+
+**No existe galería ni registro oficial de plugins.** El "listado" es una categoría de foro
+(`community.getmailspring.com/c/plugins/8`) con ~17 topics; sin proceso de envío, sin aprobación,
+sin vetting. El "plugin gallery" prometido (Foundry376/Mailspring#363) nunca se materializó.
+Publicar = abrir un topic. **El foro es 100% en inglés**, así que difundir depende de tener antes
+la internacionalización y el README en inglés.
 
 ## Estructura y build
 
@@ -96,8 +171,10 @@ iconos SVG del plugin van como **data-URI base64** (Chromium no acepta SVG como 
 
 - **SO:** Windows 11 (PowerShell). Usuario: `chowk`. Bash (Git Bash) también disponible.
 - **Node.js** v24.15.0 · **npm** 11.12.1 · **Git** 2.55.
-- **Mailspring** 1.22.0, interfaz en **español**. Menú "Desarrollador" → "Ejecutar en modo
-  depuración". También existe "Instalar un complemento..." para instalar desde carpeta.
+- **Mailspring** 1.23.0 (actualizado; hasta S07 era 1.22.0), interfaz en **español**. Menú
+  "Desarrollador" → "Ejecutar en modo depuración". También existe "Instalar un complemento..."
+  para instalar desde carpeta. Al verificar APIs contra el asar, usar la carpeta de la versión
+  vigente: `%LOCALAPPDATA%\Mailspring\app-1.23.0\resources\app.asar`.
 - **Carpeta de packages de Mailspring:** `C:\Users\chowk\AppData\Roaming\Mailspring\packages`.
   El plugin se instala ahí (junction/symlink al repo para desarrollo iterativo).
 - **DevTools:** Ctrl+Shift+I · **Recargar plugins/ventana:** Ctrl+Shift+R.

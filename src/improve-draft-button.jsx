@@ -1,6 +1,6 @@
 import { React, ReactDOM, PropTypes, Actions } from "mailspring-exports";
 import { RetinaImg } from "mailspring-component-kit";
-import { htmlToPlainText, plainTextToDraftHtml } from "./thread-text";
+import { htmlToPlainText, plainTextToDraftHtml, contactLabel } from "./thread-text";
 import { improveDraft, getDefaultInstruction } from "./claude-client";
 
 /*
@@ -17,6 +17,9 @@ import { improveDraft, getDefaultInstruction } from "./claude-client";
  *   que el resto de la barra.
  * UI-03: el panel usa el sistema nativo de popovers (Actions.openPopover, como
  *   el popup de Plantillas) en lugar del panel flotante propio con portal.
+ * BUG-01: se le pasa a Claude quién firma el borrador (y a quién va dirigido);
+ *   sin esa información elegía el género al azar y devolvía "Quedo atenta" en
+ *   un correo firmado por un hombre.
  */
 
 // Icono del botón (sunburst) como data-URI: el protocolo mailspring:// sirve
@@ -27,6 +30,22 @@ const COMPOSER_ICON_URL =
   "data:image/svg+xml;base64," +
   "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNyIgaGVpZ2h0PSIxNyIgdmlld0JveD0iMCAwIDI0IDI0Ij4KICA8ZyBzdHJva2U9IiMwMDAwMDAiIHN0cm9rZS13aWR0aD0iMi42IiBzdHJva2UtbGluZWNhcD0icm91bmQiPgogICAgPGxpbmUgeDE9IjE3LjUiIHkxPSIxMiIgeDI9IjIzIiB5Mj0iMTIiLz4KICAgIDxsaW5lIHgxPSIxNS45IiB5MT0iMTUuOSIgeDI9IjE5LjgiIHkyPSIxOS44Ii8+CiAgICA8bGluZSB4MT0iMTIiIHkxPSIxNy41IiB4Mj0iMTIiIHkyPSIyMyIvPgogICAgPGxpbmUgeDE9IjguMSIgeTE9IjE1LjkiIHgyPSI0LjIiIHkyPSIxOS44Ii8+CiAgICA8bGluZSB4MT0iNi41IiB5MT0iMTIiIHgyPSIxIiB5Mj0iMTIiLz4KICAgIDxsaW5lIHgxPSI4LjEiIHkxPSI4LjEiIHgyPSI0LjIiIHkyPSI0LjIiLz4KICAgIDxsaW5lIHgxPSIxMiIgeTE9IjYuNSIgeDI9IjEyIiB5Mj0iMSIvPgogICAgPGxpbmUgeDE9IjE1LjkiIHkxPSI4LjEiIHgyPSIxOS44IiB5Mj0iNC4yIi8+CiAgPC9nPgo8L3N2Zz4K";
 
+// BUG-01: identidad del borrador para el prompt. `from` es la cuenta con la que
+// se envía (la que firma) y `to` los destinatarios, que definen el género del
+// saludo. Se lee del borrador, no de la firma, porque es el dato fiable incluso
+// cuando el usuario no tiene firma configurada.
+function draftIdentity(draft) {
+  if (!draft) {
+    return {};
+  }
+  const sender = draft.from && draft.from[0];
+  const recipients = draft.to || [];
+  return {
+    from: sender ? contactLabel(sender) : null,
+    to: recipients.length ? recipients.map(contactLabel).join(", ") : null,
+  };
+}
+
 // Contenido del popover. Vive montado dentro del FixedPopover nativo de
 // Mailspring, que se encarga de posición, fondo, sombra y cierre (clic fuera
 // o Escape). Recibe el texto ya extraído y la sesión del borrador.
@@ -35,7 +54,12 @@ class ImproveDraftPopover extends React.Component {
 
   static propTypes = {
     extracted: PropTypes.string,
+    identity: PropTypes.object,
     session: PropTypes.object.isRequired,
+  };
+
+  static defaultProps = {
+    identity: {},
   };
 
   constructor(props) {
@@ -54,14 +78,14 @@ class ImproveDraftPopover extends React.Component {
   }
 
   _onImprove = async () => {
-    const { extracted } = this.props;
+    const { extracted, identity } = this.props;
     const { instruction } = this.state;
     if (!instruction.trim() || !extracted || !extracted.trim()) {
       return;
     }
     this.setState({ stage: "loading", improved: null, error: null });
     try {
-      const improved = await improveDraft(extracted, instruction.trim());
+      const improved = await improveDraft(extracted, instruction.trim(), identity);
       if (this._unmounted) return;
       this.setState({ stage: "preview", improved });
     } catch (err) {
@@ -210,7 +234,11 @@ export default class ImproveDraftButton extends React.Component {
     const text = htmlToPlainText(this.props.draft.body || "");
     const buttonRect = ReactDOM.findDOMNode(this).getBoundingClientRect();
     Actions.openPopover(
-      <ImproveDraftPopover extracted={text} session={this.props.session} />,
+      <ImproveDraftPopover
+        extracted={text}
+        identity={draftIdentity(this.props.draft)}
+        session={this.props.session}
+      />,
       { originRect: buttonRect, direction: "up" }
     );
   };

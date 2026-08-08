@@ -54,7 +54,9 @@ export function plainTextToDraftHtml(text) {
   return `<div>${escaped.replace(/\n/g, "<br/>")}</div>`;
 }
 
-function contactLabel(contact) {
+// Exportada: la usa también el botón del compositor (BUG-01) para describirle
+// a Claude quién firma el borrador y a quién va dirigido.
+export function contactLabel(contact) {
   if (!contact) {
     return "(desconocido)";
   }

@@ -163,12 +163,26 @@
 // esquinas rectas y padding lateral de 20px como el cuerpo de los mensajes. El
 // único color propio es la barra izquierda coral y el ✳, para leerse como "de
 // Claude" sin parecer una alerta.
+// UI-04: aire interno. Medido contra una fila de mensaje nativa (asar 1.23):
+// .message-header abre con padding-top 19px sobre el texto —el botón de
+// responder va centrado, así que su margen real es ~10px— y .message-item-area
+// cierra con @spacing-standard (14px). El recuadro abría parecido pero cerraba
+// con solo 5px: de ahí la sensación de contenido pegado al borde. Se unifica el
+// aire arriba y abajo, con una separación menor entre bloques internos.
+//
+// El padding de cierre vive en el panel, no en los hijos, porque la caja puede
+// terminar en .cs-head (colapsada), .cs-body (error/vacío) o .cs-meta (resumen
+// completo); así los tres cierran con el mismo aire.
+@cs-pad-box: 12px; // aire de la caja, arriba y abajo
+@cs-pad-gap: 8px; // separación entre cabecera, cuerpo y meta
+
 .claude-summary-panel {
   margin: @message-spacing 0 @padding-large-vertical;
   background: @background-primary;
   box-shadow: 0 0 0.5px rgba(0, 0, 0, 0.28), 0 1px 1.5px rgba(0, 0, 0, 0.08);
   border-left: 3px solid @claude-accent;
   overflow: hidden;
+  padding-bottom: @cs-pad-box;
 
   // En el compositor lleva margen lateral para no pegarse al borde interno.
   &.in-composer {
@@ -179,7 +193,7 @@
     display: flex;
     align-items: center;
     gap: @padding-small-horizontal;
-    padding: @padding-large-vertical @message-h-padding;
+    padding: @cs-pad-box @message-h-padding 0;
   }
 
   .cs-title {
@@ -195,7 +209,7 @@
   }
 
   .cs-body {
-    padding: 0 @message-h-padding @padding-base-vertical;
+    padding: @cs-pad-gap @message-h-padding 0;
     line-height: 1.5;
     color: @text-color;
     white-space: pre-wrap;
@@ -213,13 +227,13 @@
   }
 
   .cs-meta {
-    padding: 0 @message-h-padding @padding-base-vertical;
+    padding: @cs-pad-gap @message-h-padding 0;
     font-size: @font-size-smaller;
     color: @text-color-very-subtle;
   }
 
   .cs-stale {
-    padding: 0 @message-h-padding @padding-base-vertical;
+    padding: @cs-pad-gap @message-h-padding 0;
     font-size: @font-size-smaller;
     color: @text-color-subtle;
     font-style: italic;

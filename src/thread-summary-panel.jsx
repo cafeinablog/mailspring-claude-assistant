@@ -1,5 +1,6 @@
-import { React, PropTypes } from "mailspring-exports";
+import { React, PropTypes, localized } from "mailspring-exports";
 import store from "./summary-store";
+import { t } from "./i18n";
 
 /*
  * Recuadro de resumen del hilo, compartido por la opción A (cabecera del hilo)
@@ -24,12 +25,12 @@ function modelShort(id) {
 function relativeTime(ts) {
   if (!ts) return "";
   const mins = Math.round((Date.now() - ts) / 60000);
-  if (mins < 1) return "hace un momento";
-  if (mins < 60) return `hace ${mins} min`;
+  if (mins < 1) return t("justNow");
+  if (mins < 60) return t("minutesAgo", mins);
   const hrs = Math.round(mins / 60);
-  if (hrs < 24) return `hace ${hrs} h`;
+  if (hrs < 24) return t("hoursAgo", hrs);
   const days = Math.round(hrs / 24);
-  return `hace ${days} d`;
+  return t("daysAgo", days);
 }
 
 export default class ThreadSummaryPanel extends React.Component {
@@ -70,7 +71,7 @@ export default class ThreadSummaryPanel extends React.Component {
     }
     if (!this._mounted) return;
     if (!data || !data.text || !data.text.trim()) {
-      this.setState({ error: "No se pudo leer el hilo (o sus mensajes siguen cargando)." });
+      this.setState({ error: t("threadUnreadable") });
       return;
     }
     try {
@@ -103,25 +104,25 @@ export default class ThreadSummaryPanel extends React.Component {
       <div className={rootClass}>
         <div className="cs-head">
           <span className="cs-title">
-            <span className="cs-sun">✳</span> Resumen del hilo
+            <span className="cs-sun">✳</span> {t("summaryTitle")}
           </span>
           <span className="cs-grow" />
           {generating ? (
             <button className="btn" disabled>
-              Generando…
+              {t("generating")}
             </button>
           ) : entry ? (
             <button className="btn" onClick={this._onGenerate}>
-              {newMsgs > 0 ? `Actualizar (${newMsgs} ${newMsgs === 1 ? "nuevo" : "nuevos"})` : "Regenerar"}
+              {newMsgs > 0 ? t("updateWithNew", newMsgs) : t("regenerate")}
             </button>
           ) : (
             <button className="btn" onClick={this._onGenerate}>
-              Generar resumen
+              {t("generateSummary")}
             </button>
           )}
           {entry && !generating && (
             <button className="btn" onClick={this._toggleCollapsed} aria-expanded={!collapsed}>
-              {collapsed ? "Mostrar ▸" : "Ocultar ▾"}
+              {collapsed ? `${localized("Show")} ▸` : `${localized("Hide")} ▾`}
             </button>
           )}
         </div>
@@ -129,20 +130,15 @@ export default class ThreadSummaryPanel extends React.Component {
         {error && <div className="cs-body cs-error">{error}</div>}
 
         {generating && !error && (
-          <div className="cs-body cs-muted">Generando resumen con Claude…</div>
+          <div className="cs-body cs-muted">{t("generatingWithClaude")}</div>
         )}
 
         {entry && !generating && !collapsed && (
           <div>
-            {newMsgs > 0 && (
-              <div className="cs-stale">
-                Llegaron {newMsgs} {newMsgs === 1 ? "mensaje nuevo" : "mensajes nuevos"} desde este
-                resumen.
-              </div>
-            )}
+            {newMsgs > 0 && <div className="cs-stale">{t("newMessagesSince", newMsgs)}</div>}
             <div className="cs-body">{entry.text}</div>
             <div className="cs-meta">
-              {[modelShort(entry.model), relativeTime(entry.generatedAt), `${entry.messageCount} mensajes`]
+              {[modelShort(entry.model), relativeTime(entry.generatedAt), t("messageCount", entry.messageCount)]
                 .filter(Boolean)
                 .join(" · ")}
             </div>
@@ -150,9 +146,7 @@ export default class ThreadSummaryPanel extends React.Component {
         )}
 
         {!entry && !generating && !error && (
-          <div className="cs-body cs-muted">
-            Aún no hay resumen de este hilo.
-          </div>
+          <div className="cs-body cs-muted">{t("noSummaryYet")}</div>
         )}
       </div>
     );

@@ -2,6 +2,7 @@ import { React, ReactDOM, PropTypes, Actions } from "mailspring-exports";
 import { RetinaImg } from "mailspring-component-kit";
 import { htmlToPlainText, plainTextToDraftHtml, contactLabel } from "./thread-text";
 import { improveDraft, getDefaultInstruction } from "./claude-client";
+import { t } from "./i18n";
 
 /*
  * Botón "Mejorar con Claude" en la barra de acciones del compositor.
@@ -137,18 +138,14 @@ class ImproveDraftPopover extends React.Component {
     const { instruction } = this.state;
     const empty = !extracted || !extracted.trim();
     if (empty) {
-      return (
-        <div className="panel-body empty">
-          El borrador está vacío. Escribe algo y vuelve a intentarlo.
-        </div>
-      );
+      return <div className="panel-body empty">{t("draftEmpty")}</div>;
     }
     return (
       <div>
         <div className="panel-body draft-preview">{extracted}</div>
         <textarea
           className="instruction-input"
-          placeholder='¿Cómo lo mejoro? ej. "hazlo más formal", "acórtalo"'
+          placeholder={t("instructionPlaceholder")}
           value={instruction}
           autoFocus
           rows={2}
@@ -161,7 +158,7 @@ class ImproveDraftPopover extends React.Component {
             disabled={!instruction.trim()}
             onClick={this._onImprove}
           >
-            Mejorar
+            {t("improve")}
           </button>
         </div>
       </div>
@@ -172,14 +169,14 @@ class ImproveDraftPopover extends React.Component {
     const { stage, improved, error } = this.state;
     let body;
     if (stage === "loading") {
-      body = <div className="panel-body loading">Mejorando el borrador con Claude…</div>;
+      body = <div className="panel-body loading">{t("improvingWithClaude")}</div>;
     } else if (stage === "error") {
       body = (
         <div>
           <div className="panel-body error">{error}</div>
           <div className="panel-actions">
             <button className="btn" onClick={() => this.setState({ stage: "input", error: null })}>
-              Volver
+              {t("back")}
             </button>
           </div>
         </div>
@@ -190,10 +187,10 @@ class ImproveDraftPopover extends React.Component {
           <div className="panel-body">{improved}</div>
           <div className="panel-actions">
             <button className="btn" onClick={this._onDiscard}>
-              Descartar
+              {t("discard")}
             </button>
             <button className="btn btn-emphasis" onClick={this._onApply}>
-              Aplicar
+              {t("apply")}
             </button>
           </div>
         </div>
@@ -207,7 +204,7 @@ class ImproveDraftPopover extends React.Component {
     // recibía foco y el clic fuera no lo cerraba.
     return (
       <div className="claude-improve-popover" tabIndex={-1}>
-        <div className="panel-title">Mejorar con Claude</div>
+        <div className="panel-title">{t("improveWithClaude")}</div>
         {body}
       </div>
     );
@@ -248,8 +245,8 @@ export default class ImproveDraftButton extends React.Component {
       <button
         tabIndex={-1}
         className="btn btn-toolbar narrow claude-improve-btn"
-        title="Mejorar con Claude"
-        aria-label="Mejorar con Claude"
+        title={t("improveWithClaude")}
+        aria-label={t("improveWithClaude")}
         onClick={this._onClick}
       >
         <RetinaImg url={COMPOSER_ICON_URL} mode={RetinaImg.Mode.ContentIsMask} aria-hidden="true" />

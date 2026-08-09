@@ -12,6 +12,8 @@
  *   AppEnv.config.set("mailspring-claude-assistant.apiKey", "sk-ant-...")
  */
 
+import { t } from "./i18n";
+
 const API_URL = "https://api.anthropic.com/v1/messages";
 const API_VERSION = "2023-06-01";
 
@@ -60,30 +62,27 @@ function friendlyError(status, body) {
     body && body.error && body.error.message ? ` (${body.error.message})` : "";
   switch (status) {
     case 401:
-      return "API key inválida o revocada. Verifica la key guardada en la configuración.";
+      return t("errApiKeyInvalid");
     case 403:
-      return `La API key no tiene permiso para esta operación${apiMessage}.`;
+      return t("errForbidden", apiMessage);
     case 404:
-      return `Modelo no encontrado${apiMessage}.`;
+      return t("errModelNotFound", apiMessage);
     case 429:
-      return "Límite de uso alcanzado (rate limit o presupuesto). Espera un momento e inténtalo de nuevo.";
+      return t("errRateLimit");
     case 500:
     case 529:
-      return "El servicio de Anthropic está sobrecargado o con errores. Inténtalo de nuevo en unos minutos.";
+      return t("errOverloaded");
     default:
-      return `Error ${status} de la API de Claude${apiMessage}.`;
+      return t("errGeneric", status, apiMessage);
   }
 }
 
 // Llamada genérica a /v1/messages. Devuelve el texto de la respuesta.
-// Lanza Error con mensaje amigable (en español) si algo falla.
+// Lanza Error con mensaje amigable (localizado) si algo falla.
 export async function callClaude({ model, system, userText, maxTokens = 1024 }) {
   const apiKey = getApiKey();
   if (!apiKey) {
-    throw new Error(
-      "No hay API key configurada. Abre la consola de desarrollador (Ctrl+Shift+I) y ejecuta:\n" +
-        'AppEnv.config.set("mailspring-claude-assistant.apiKey", "sk-ant-...")'
-    );
+    throw new Error(t("errNoApiKey"));
   }
 
   let response;
@@ -104,7 +103,7 @@ export async function callClaude({ model, system, userText, maxTokens = 1024 }) 
       }),
     });
   } catch (err) {
-    throw new Error("No se pudo conectar con la API de Claude. Revisa tu conexión a internet.");
+    throw new Error(t("errNoConnection"));
   }
 
   let body = null;
@@ -125,45 +124,47 @@ export async function callClaude({ model, system, userText, maxTokens = 1024 }) 
     .trim();
 
   if (!text) {
-    throw new Error("Claude devolvió una respuesta vacía. Inténtalo de nuevo.");
+    throw new Error(t("errEmptyResponse"));
   }
   if (body.stop_reason === "max_tokens") {
-    return `${text}\n\n[Nota: la respuesta fue recortada por el límite de tokens.]`;
+    return `${text}${t("truncatedNote")}`;
   }
   return text;
 }
 
 // El panel renderiza texto plano, así que se pide explícitamente no usar
 // Markdown (los ** y # se verían literales).
+// I18N-04: los prompts de sistema van en inglés por neutralidad — la salida
+// de Claude ya se adapta sola al idioma del hilo/borrador (instrucción
+// explícita más abajo), así que esto no cambia el comportamiento observado.
 const PLAIN_TEXT_RULE =
-  " Escribe en texto plano sin formato Markdown: nada de asteriscos, almohadillas ni " +
-  "negritas; para viñetas usa un guion simple (-) y para títulos de sección usa " +
-  "MAYÚSCULAS seguidas de dos puntos.";
+  " Write in plain text with no Markdown formatting: no asterisks, hashes or bold; use a " +
+  "simple dash (-) for bullet points and UPPERCASE followed by a colon for section titles.";
 
 const SUMMARY_SYSTEM =
-  "Eres un asistente que resume hilos de correo electrónico. Responde siempre en el idioma " +
-  "predominante del hilo. Produce un resumen claro y accionable: una o dos oraciones de contexto, " +
-  "los puntos clave en viñetas (qué se discutió y qué se decidió), y al final una línea " +
-  "'Pendientes:' con las acciones abiertas y quién debe hacerlas (si las hay). Ignora firmas, " +
-  "avisos legales y texto repetido. No inventes información que no esté en el hilo." +
+  "You are an assistant that summarizes email threads. Always respond in the thread's " +
+  "predominant language. Produce a clear, actionable summary: one or two sentences of " +
+  "context, the key points as bullets (what was discussed and what was decided), and a " +
+  "final 'Pending:' line with open action items and who owns them (if any). Ignore " +
+  "signatures, legal notices and repeated text. Don't invent information that isn't in " +
+  "the thread." +
   PLAIN_TEXT_RULE;
 
 const IMPROVE_SYSTEM =
-  "Eres un asistente de redacción de correos electrónicos. Recibirás el texto plano del " +
-  "borrador de un correo y una instrucción de mejora del usuario. Reescribe el borrador " +
-  "siguiendo la instrucción. Responde ÚNICAMENTE con el texto mejorado del correo: sin " +
-  "explicaciones, sin asunto y sin comentarios antes o después. Conserva el idioma del " +
-  "borrador salvo que la instrucción pida cambiarlo, y no inventes información que no esté " +
-  "en el borrador. Escribe en texto plano, sin formato Markdown (nada de asteriscos ni " +
-  "almohadillas). " +
+  "You are an email drafting assistant. You will receive the plain text of an email draft " +
+  "and an improvement instruction from the user. Rewrite the draft following the " +
+  "instruction. Respond ONLY with the improved email text: no explanations, no subject " +
+  "line, no comments before or after. Keep the draft's language unless the instruction " +
+  "asks to change it, and don't invent information that isn't in the draft. Write in " +
+  "plain text, with no Markdown formatting (no asterisks or hashes). " +
   // BUG-01: sin esto el modelo elegía el género al azar y firmaba "Quedo atenta"
   // en un correo de un hombre.
-  "Cuando se indique el remitente, escribe siempre en primera persona como esa persona y " +
-  "concuerda en género los adjetivos y participios que se refieran a ella (por ejemplo " +
-  "'quedo atento' si es hombre y 'quedo atenta' si es mujer); aplica el mismo criterio a los " +
-  "destinatarios en el saludo y la despedida. Si un nombre no permite deducir el género con " +
-  "certeza, usa fórmulas neutras ('quedo pendiente', 'un saludo') en vez de adivinar. Nunca " +
-  "cambies la firma ni el nombre del remitente.";
+  "When a sender is given, always write in first person as that person and match the " +
+  "grammatical gender of any adjectives or participles referring to them in the target " +
+  "language (for example, in Spanish, 'quedo atento' if the sender is a man and 'quedo " +
+  "atenta' if a woman); apply the same to recipients in the greeting and sign-off. If a " +
+  "name doesn't clearly reveal gender, use neutral phrasing instead of guessing. Never " +
+  "change the signature or the sender's name.";
 
 // DEV-09: mejora del borrador según una instrucción libre del usuario.
 // BUG-01: `identity` ({ from, to }) le dice a Claude quién firma y a quién le
@@ -172,16 +173,16 @@ const IMPROVE_SYSTEM =
 export function improveDraft(draftText, instruction, identity = {}) {
   const context = [];
   if (identity.from) {
-    context.push(`Remitente (quien escribe y firma este correo): ${identity.from}`);
+    context.push(`Sender (who is writing and signing this email): ${identity.from}`);
   }
   if (identity.to) {
-    context.push(`Destinatario(s): ${identity.to}`);
+    context.push(`Recipient(s): ${identity.to}`);
   }
   const header = context.length ? `${context.join("\n")}\n\n` : "";
   return callClaude({
     model: getModel("improveDraft"),
     system: IMPROVE_SYSTEM,
-    userText: `${header}Instrucción de mejora: ${instruction}\n\nBorrador:\n${draftText}`,
+    userText: `${header}Improvement instruction: ${instruction}\n\nDraft:\n${draftText}`,
     maxTokens: 2048,
   });
 }
@@ -192,7 +193,7 @@ export function summarizeThread(threadText) {
   return callClaude({
     model: getModel("summary"),
     system: SUMMARY_SYSTEM,
-    userText: `Resume este hilo de correo:\n\n${threadText}`,
+    userText: `Summarize this email thread:\n\n${threadText}`,
     maxTokens: 1536,
   });
 }

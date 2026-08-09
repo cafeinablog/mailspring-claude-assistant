@@ -196,20 +196,23 @@ la internacionalización y el README en inglés.
 
 ## Entorno de Daniel
 
-- **SO:** Windows 11 (PowerShell). Usuario: `chowk`. Bash (Git Bash) también disponible.
+> ⚠️ Este archivo es **público** (el repo lo es). No escribir aquí rutas con el nombre de usuario
+> real, nombres de repos privados, correos personales ni nada que vincule identidades. Usar
+> variables de entorno (`%APPDATA%`, `%LOCALAPPDATA%`) en vez de rutas absolutas.
+
+- **SO:** Windows 11 (PowerShell). Bash (Git Bash) también disponible.
 - **Node.js** v24.15.0 · **npm** 11.12.1 · **Git** 2.55.
 - **Mailspring** 1.23.0 (actualizado; hasta S07 era 1.22.0), interfaz en **español**. Menú
   "Desarrollador" → "Ejecutar en modo depuración". También existe "Instalar un complemento..."
   para instalar desde carpeta. Al verificar APIs contra el asar, usar la carpeta de la versión
   vigente: `%LOCALAPPDATA%\Mailspring\app-1.23.0\resources\app.asar`.
-- **Carpeta de packages de Mailspring:** `C:\Users\chowk\AppData\Roaming\Mailspring\packages`.
+- **Carpeta de packages de Mailspring:** `%APPDATA%\Mailspring\packages`.
   El plugin se instala ahí (junction/symlink al repo para desarrollo iterativo).
 - **DevTools:** Ctrl+Shift+I · **Recargar plugins/ventana:** Ctrl+Shift+R.
 - **Repo GitHub principal (público, distribución):** `cafeinablog/mailspring-claude-assistant` —
-  remote `origin`. El repo viejo `chowkaideng/mailspring-claude-assistant` (privado) sigue como
-  remote `privado`, solo de respaldo. Credenciales por-repo (`credential.useHttpPath true`) para
-  que ambas cuentas convivan; identidad de commits repo-local: `cafeinablog`
-  (`306714372+cafeinablog@users.noreply.github.com`).
+  remote `origin`. Existe además un remote `privado` de respaldo. Credenciales por-repo
+  (`credential.useHttpPath true`) para que las cuentas convivan; la identidad de commits es
+  repo-local (`git config user.email`, cuenta `cafeinablog` con su dirección noreply de GitHub).
 
 ## Distribución pública (desde S05)
 

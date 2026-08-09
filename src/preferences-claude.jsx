@@ -1,5 +1,6 @@
-import { React } from "mailspring-exports";
+import { React, localized } from "mailspring-exports";
 import { CONFIG_KEYS, MODEL_DEFAULTS } from "./claude-client";
+import { t } from "./i18n";
 
 /*
  * DEV-11: pestaña "Claude" en Preferencias (PreferencesUIStore.TabItem).
@@ -17,15 +18,15 @@ import { CONFIG_KEYS, MODEL_DEFAULTS } from "./claude-client";
 // Opciones de modelo ofrecidas en los selects. Si en la config hay un modelo
 // que no está en la lista (p. ej. editado a mano), se agrega como opción para
 // no pisarlo al renderizar.
-const MODEL_OPTIONS = [
-  { id: "claude-haiku-4-5", label: "Haiku 4.5 (rápido y económico)" },
-  { id: "claude-sonnet-5", label: "Sonnet 5 (equilibrado)" },
-  { id: "claude-opus-4-8", label: "Opus 4.8 (máxima calidad)" },
+const MODEL_OPTIONS = () => [
+  { id: "claude-haiku-4-5", label: t("modelHaiku") },
+  { id: "claude-sonnet-5", label: t("modelSonnet") },
+  { id: "claude-opus-4-8", label: t("modelOpus") },
 ];
 
-const MODEL_FIELDS = [
-  { key: CONFIG_KEYS.modelSummary, task: "summary", label: "Resumen del hilo" },
-  { key: CONFIG_KEYS.modelImprove, task: "improveDraft", label: "Mejorar respuesta" },
+const MODEL_FIELDS = () => [
+  { key: CONFIG_KEYS.modelSummary, task: "summary", label: t("modelSummaryLabel") },
+  { key: CONFIG_KEYS.modelImprove, task: "improveDraft", label: t("modelImproveLabel") },
 ];
 
 export default class PreferencesClaude extends React.Component {
@@ -47,9 +48,10 @@ export default class PreferencesClaude extends React.Component {
 
   _renderModelSelect({ key, task, label }) {
     const current = AppEnv.config.get(key) || MODEL_DEFAULTS[task];
-    const options = MODEL_OPTIONS.some(o => o.id === current)
-      ? MODEL_OPTIONS
-      : [...MODEL_OPTIONS, { id: current, label: current }];
+    const options = MODEL_OPTIONS();
+    const allOptions = options.some(o => o.id === current)
+      ? options
+      : [...options, { id: current, label: current }];
     return (
       <div className="pref-row" key={key}>
         <label htmlFor={key}>{label}</label>
@@ -61,7 +63,7 @@ export default class PreferencesClaude extends React.Component {
             this.forceUpdate();
           }}
         >
-          {options.map(o => (
+          {allOptions.map(o => (
             <option key={o.id} value={o.id}>
               {o.label}
             </option>
@@ -76,9 +78,9 @@ export default class PreferencesClaude extends React.Component {
     return (
       <div className="container-claude-preferences">
         <section>
-          <h6>API DE ANTHROPIC</h6>
+          <h6>{t("apiSectionTitle")}</h6>
           <div className="pref-row">
-            <label htmlFor={CONFIG_KEYS.apiKey}>API key</label>
+            <label htmlFor={CONFIG_KEYS.apiKey}>{t("apiKeyLabel")}</label>
             <input
               id={CONFIG_KEYS.apiKey}
               type={showKey ? "text" : "password"}
@@ -92,32 +94,26 @@ export default class PreferencesClaude extends React.Component {
                 checked={showKey}
                 onChange={e => this.setState({ showKey: e.target.checked })}
               />
-              Mostrar
+              {localized("Show")}
             </label>
           </div>
-          <div className="pref-note">
-            Se genera en console.anthropic.com. Se guarda en texto plano en la configuración
-            local de Mailspring (config.json) — solo en esta computadora.
-          </div>
+          <div className="pref-note">{t("apiKeyNote")}</div>
         </section>
 
         <section>
-          <h6>MODELOS</h6>
-          {MODEL_FIELDS.map(field => this._renderModelSelect(field))}
-          <div className="pref-note">
-            El resumen usa un solo modelo. Para resúmenes más detallados, elige un modelo de mayor
-            calidad (Sonnet u Opus); para ahorrar, Haiku.
-          </div>
+          <h6>{t("modelsSectionTitle")}</h6>
+          {MODEL_FIELDS().map(field => this._renderModelSelect(field))}
+          <div className="pref-note">{t("modelsNote")}</div>
         </section>
 
         <section>
-          <h6>MEJORAR RESPUESTA</h6>
+          <h6>{t("improveSectionTitle")}</h6>
           <div className="pref-row">
-            <label htmlFor={CONFIG_KEYS.defaultInstruction}>Instrucción por defecto</label>
+            <label htmlFor={CONFIG_KEYS.defaultInstruction}>{t("defaultInstructionLabel")}</label>
             <input
               id={CONFIG_KEYS.defaultInstruction}
               type="text"
-              placeholder='opcional, ej. "corrige ortografía y hazlo más claro"'
+              placeholder={t("defaultInstructionPlaceholder")}
               value={defaultInstruction}
               onChange={e =>
                 this._setConfig(
@@ -128,10 +124,7 @@ export default class PreferencesClaude extends React.Component {
               }
             />
           </div>
-          <div className="pref-note">
-            Si la defines, el panel "Mejorar con Claude" la trae pre-escrita; siempre puedes
-            editarla antes de enviar.
-          </div>
+          <div className="pref-note">{t("defaultInstructionNote")}</div>
         </section>
       </div>
     );

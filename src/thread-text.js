@@ -58,7 +58,7 @@ export function plainTextToDraftHtml(text) {
 // a Claude quién firma el borrador y a quién va dirigido.
 export function contactLabel(contact) {
   if (!contact) {
-    return "(desconocido)";
+    return "(unknown)";
   }
   const name = contact.displayName ? contact.displayName() : contact.name;
   return name && name !== contact.email ? `${name} <${contact.email}>` : contact.email;
@@ -68,14 +68,14 @@ export function contactLabel(contact) {
 // mensajes (ya sin borradores). Compartido por el hilo enfocado (MessageStore)
 // y por la opción A / C, que reciben los mensajes por otras vías.
 export function buildThreadText(subject, messages) {
-  const subj = subject || "(sin asunto)";
+  const subj = subject || "(no subject)";
   const parts = messages.map((msg, idx) => {
     const from = contactLabel(msg.from && msg.from[0]);
     const date = msg.date ? new Date(msg.date).toLocaleString() : "";
     const body = htmlToPlainText(msg.body) || (msg.snippet || "").trim();
-    return `[Mensaje ${idx + 1} de ${messages.length}] De: ${from} — ${date}\n${body}`;
+    return `[Message ${idx + 1} of ${messages.length}] From: ${from} — ${date}\n${body}`;
   });
-  return `Asunto: ${subj}\n\n${parts.join("\n\n---\n\n")}`;
+  return `Subject: ${subj}\n\n${parts.join("\n\n---\n\n")}`;
 }
 
 // Devuelve { subject, messageCount, text } del hilo enfocado,
@@ -90,7 +90,7 @@ export function getFocusedThreadPlainText() {
     return null;
   }
   return {
-    subject: thread.subject || "(sin asunto)",
+    subject: thread.subject || "(no subject)",
     messageCount: messages.length,
     text: buildThreadText(thread.subject, messages),
   };

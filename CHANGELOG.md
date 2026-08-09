@@ -1,36 +1,63 @@
 # Changelog
 
-Todas las novedades relevantes de este proyecto se documentan en este archivo.
-El formato se basa en [Keep a Changelog](https://keepachangelog.com/es-ES/1.0.0/)
-y el proyecto sigue [versionado semántico](https://semver.org/lang/es/).
+All notable changes to this project are documented in this file.
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [0.2.0] - 2026-08-08
+
+### Added
+- **Interface localization.** The plugin now follows Mailspring's own language
+  setting (Preferences → General → Interface Language), with translations for
+  English, Spanish, Portuguese and Brazilian Portuguese. Any other language
+  falls back to English. All user-facing strings live in a single file
+  (`src/i18n.js`), so adding a language means copying one block and translating
+  its values.
+- English `README.md` as the canonical version, with `README.es.md` alongside it
+  and a language switcher at the top.
+
+### Changed
+- **English is now the base language of the interface.** Previously the UI was
+  Spanish-only; existing users whose Mailspring is set to Spanish will see no
+  difference, but the default for everyone else is now English.
+- System prompts sent to Claude are now written in English, for neutrality.
+  This does not change the output language: summaries still follow the thread's
+  language and improved replies still keep the draft's language.
+- Generic terms (Show / Hide) now use Mailspring's own translations, so they are
+  localized in every language Mailspring ships.
+
+### Fixed
+- Singular/plural agreement in the summary panel, which previously produced
+  phrasing like "1 messages".
 
 ## [0.1.1] - 2026-08-08
 
-### Corregido
-- **Mejorar respuesta**: el prompt ahora recibe el remitente y los destinatarios del
-  borrador, así que la concordancia de género en la respuesta generada ya no queda
-  al azar (antes podía escribir "quedo atenta" firmando como Daniel). Ante nombres
-  ambiguos, usa fórmulas neutras en vez de adivinar.
+### Fixed
+- **Improve reply**: the prompt now receives the draft's sender and recipients,
+  so grammatical gender agreement in the generated reply is no longer left to
+  chance (it could previously sign off in the wrong gender). When a name doesn't
+  clearly reveal gender, it uses neutral phrasing instead of guessing.
 
-### Cambiado
-- Más aire interno en la caja de resumen (cabecera y pie del compositor), para que
-  se sienta menos apretada frente a una fila de mensaje nativa.
-
-[0.1.1]: https://github.com/cafeinablog/mailspring-claude-assistant/releases/tag/v0.1.1
+### Changed
+- More internal padding in the summary box (both in the thread header and the
+  composer footer), so it feels less cramped next to a native message row.
 
 ## [0.1.0] - 2026-07-18
 
-Primera versión pública.
+First public release.
 
-### Añadido
-- **Resumir hilo**: recuadro de resumen en la cabecera del hilo y en el pie del
-  compositor, que comparten el mismo resultado (caché por hilo). Un botón
-  "Generar resumen" con modelo configurable.
-- **Mejorar respuesta**: campo de instrucción libre en el compositor, con vista
-  previa Aplicar/Descartar. Al aplicar conserva intactas la firma y la cita.
-- **Preferencias → Claude**: configuración de la API key, los modelos por tarea
-  y una instrucción de mejora por defecto.
-- Todo el procesamiento es en texto plano; nunca se manipula el HTML del correo.
-- Probado en Gmail, Google Workspace y Office 365 sobre Mailspring 1.22.
+### Added
+- **Summarize thread**: a summary panel in the thread header and in the composer
+  footer, sharing a single result (cached per thread). One "Generate summary"
+  button with a configurable model.
+- **Improve reply**: a free-form instruction field in the composer, with an
+  Apply/Discard preview. Applying leaves the signature and the quoted message
+  untouched.
+- **Preferences → Claude**: settings for the API key, the model per task and a
+  default improvement instruction.
+- All processing happens in plain text; the email's HTML is never manipulated.
+- Tested on Gmail, Google Workspace and Office 365 with Mailspring 1.22.
 
+[0.2.0]: https://github.com/cafeinablog/mailspring-claude-assistant/releases/tag/v0.2.0
+[0.1.1]: https://github.com/cafeinablog/mailspring-claude-assistant/releases/tag/v0.1.1
 [0.1.0]: https://github.com/cafeinablog/mailspring-claude-assistant/releases/tag/v0.1.0

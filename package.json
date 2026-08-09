@@ -1,7 +1,7 @@
 {
   "name": "mailspring-claude-assistant",
   "main": "./lib/main",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "cafeinablog",
   "homepage": "https://github.com/cafeinablog/mailspring-claude-assistant#readme",
   "repository": {
@@ -21,7 +21,7 @@
     "default": true,
     "composer": true
   },
-  "description": "Plugin personal de Mailspring que integra la API de Claude: resumir hilo y mejorar respuesta (texto plano, con vista previa).",
+  "description": "Mailspring plugin that integrates the Claude API: summarize threads and improve replies (plain text, with preview).",
   "devDependencies": {
     "@types/react": "^16.7.22",
     "typescript": "^3.6.3"

@@ -95,23 +95,21 @@ remitente, concordancia de género en adjetivos/participios (también en el salu
 - **DOC-01** (opcional) · Recortar el `demo.gif`: los frames 13-48 (~4.25 s de scroll por el hilo)
   no aportan; bajaría la duración de 26 a 22 s. Reemplazar `docs/screenshots/demo.gif`.
 
-### Fase 14 — Internacionalización (definida S08; ver hallazgo técnico abajo)
+### Fase 14 — Internacionalización ✅ COMPLETA (S09)
 
-- **I18N-01** · Módulo `i18n.js`: diccionario propio del plugin + `getCurrentLocale()`, con
-  fallback a `localized()` de Mailspring para los términos genéricos.
-- **I18N-02** · Invertir el idioma base: strings de UI a inglés, español al diccionario (~15).
-- **I18N-03** · Mensajes de error de `claude-client.js` (~10) al mismo esquema.
-- **I18N-04** · Prompts de sistema a inglés por neutralidad (la salida ya sigue el idioma del correo).
-- **I18N-05** · Verificar cambiando el idioma en Preferencias → General.
+I18N-01 a I18N-05 cerradas en S09, más portugués (fuera del plan original). Verificado por Daniel
+en Mailspring 1.23 en español, inglés y portugués de Brasil. Ver el hallazgo técnico abajo.
 
 ### Fase 15 — Documentación bilingüe
 
-- **DOC-04** · `README.md` a inglés (canónico, el que renderiza la portada) + `README.es.md`, con
-  selector de idioma arriba. GitHub no tiene i18n nativo de README; ésta es la convención de facto.
+- **DOC-04** ✅ **S09** · `README.md` a inglés (canónico) + `README.es.md`, con selector de idioma
+  arriba. GitHub no tiene i18n nativo de README; ésta es la convención de facto.
 - **DOC-05** · Regenerar las 5 capturas anotadas en inglés — la leyenda va **incrustada en el
   pixel**, así que hace falta un set duplicado. Absorbe DOC-02. Es la ruta crítica de la difusión.
-- **DOC-06** · `CHANGELOG.md` a inglés y solo inglés de aquí en adelante (es técnico; mantenerlo
-  bilingüe se abandona a la segunda release).
+  Daniel las rehará cuando tenga tiempo; mientras tanto el README en inglés lleva una nota que
+  avisa que las capturas están en español, para que no se lea como descuido.
+- **DOC-06** ✅ **S09** · `CHANGELOG.md` a inglés (incluidas las entradas viejas: mitad y mitad se
+  veía descuidado en un repo público) y solo inglés de aquí en adelante.
 
 ### Fase 16 — Difusión (reemplaza PUB-04)
 
@@ -124,7 +122,36 @@ remitente, concordancia de género en adjetivos/participios (también en el salu
 > única presentación disponible. Expectativa realista: con ~17 topics en toda la categoría, el
 > tráfico será modesto; se hace por tenerlo publicado y bien hecho, no por volumen.
 
-## Internacionalización — hallazgo técnico (investigado S08, sin implementar)
+## Internacionalización — IMPLEMENTADA en S09
+
+Arquitectura final en `src/i18n.js`: diccionario propio `{ en, es, pt, pt-BR }` (46 claves cada
+uno) y `t(key, ...args)`. Los valores son strings, o funciones cuando llevan variable
+(`updateWithNew: n => ...`), para no necesitar un motor de interpolación.
+
+⚠️ **`getCurrentLocale()` devuelve el locale COMPLETO con región** (`es-MX`, `es_419`, `pt-BR`,
+`en-US`), **no el idioma base.** Esto costó una iteración: la primera versión hacía
+`STRINGS[locale]`, nunca acertaba con una variante regional y todo salía en inglés aunque
+Mailspring estuviera en español. `dict()` ahora normaliza partiendo por `-` **y** por `_` (sus
+locales mezclan ambos separadores: `es_419` convive con `pt-BR`) y resuelve
+**locale exacto → idioma base → inglés**.
+
+**Por qué `pt` y `pt-BR` van separados:** el propio Mailspring traduce `Thread` como "Tópico" (pt)
+vs "Conversa" (pt-BR) y `Back` como "Recuar" vs "Voltar" — y son justo nuestro título de panel y un
+botón. Además pt-PT usa "estar a + infinitivo" ("A gerar…") donde pt-BR usa gerundio ("Gerando…").
+Que `dict()` busque el locale exacto **antes** que el idioma base es lo que permite tenerlos
+separados sin tocar la lógica; el mismo mecanismo servirá para `zh-CN` vs `zh-TW`.
+
+**Regla para sumar idiomas:** una entrada por familia cubre las variantes regionales (`es` atiende
+a es-MX/es_419/es-ES; un `pt` solo cubriría ambos portugueses). Solo se desdobla cuando las
+variantes divergen de verdad. Para los 18 idiomas "Contribuidos" de Mailspring bastarían ~16
+entradas. Hay 109 `lang/*.json` en total (18 verificados + 91 experimentales).
+
+**Verificación mecánica antes de dar por buena una traducción:** comprobar que todas las entradas
+tengan el mismo juego de claves y los mismos tipos (una función que quede como string sale como
+`[object Function]` en pantalla). Un olvido ahí se ve como texto en inglés suelto en medio de la UI
+traducida.
+
+### Investigación previa (S08) — sigue vigente
 
 Mailspring **sí** tiene i18n: `lang/*.json` con decenas de idiomas y `localized()`,
 `getCurrentLocale()`, `isRTL` exportados en `mailspring-exports` (disponibles para plugins).

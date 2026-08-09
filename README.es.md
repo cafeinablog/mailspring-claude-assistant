@@ -165,6 +165,17 @@ Request, hazlo contra la rama `develop`.
 
 <p align="center"><em>Pinina supervisando el desarrollo. Todo el código fue revisado desde su torre. 🐱</em></p>
 
+## Acerca de Cafeina.Blog
+
+Este plugin es un proyecto derivado de **[Cafeina.Blog](https://cafeina.blog)** — un proyecto
+personal de Daniel Yanes Arroyo dedicado a crear herramientas y contenido para optimizar procesos
+de negocios y emprendimientos: plantillas de Excel y Google Sheets para planificación financiera,
+proyección de ventas, control de gastos y medición de KPIs, además de un blog semanal sobre
+negocios, marketing y productividad.
+
+La idea es la misma que hay detrás de este plugin: herramientas prácticas, sin teoría innecesaria.
+(Y sí — Pinina también supervisa allá.)
+
 ## Licencia
 
 [MIT](LICENSE)

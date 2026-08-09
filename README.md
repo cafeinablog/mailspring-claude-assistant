@@ -169,6 +169,18 @@ Request, target the `develop` branch.
 
 <p align="center"><em>Pinina supervising development. All code was reviewed from her tower. 🐱</em></p>
 
+## About Cafeina.Blog
+
+This plugin is a side project of **[Cafeina.Blog](https://cafeina.blog)** — a personal project by
+Daniel Yanes Arroyo dedicated to building tools and content that help businesses and entrepreneurs
+optimize how they work: spreadsheet templates for financial planning, sales forecasting, expense
+tracking and KPI measurement, plus a weekly blog on business, marketing and productivity.
+
+Same idea behind both: practical tools, no unnecessary theory. (And yes — Pinina supervises over
+there too.)
+
+*Cafeina.Blog is published in Spanish.*
+
 ## License
 
 [MIT](LICENSE)
